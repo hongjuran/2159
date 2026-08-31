@@ -1,0 +1,22 @@
+{
+  "name": "discord-music-share-bot",
+  "version": "1.0.0",
+  "description": "개인용 디스코드 음악 봇 - 유튜브/사운드클라우드 URL로 함께 음악 듣기",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@discordjs/voice": "^0.18.0",
+    "@distube/soundcloud": "^2.0.4",
+    "@distube/yt-dlp": "^2.0.1",
+    "discord.js": "^14.27.0",
+    "distube": "^5.2.3",
+    "dotenv": "^16.4.5",
+    "libsodium-wrappers": "^0.7.15"
+  }
+}
