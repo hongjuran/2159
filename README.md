@@ -58,6 +58,23 @@ npm start
 
 명령어 접두사는 `.env`의 `COMMAND_PREFIX`로 바꿀 수 있습니다.
 
+## 봇 이름 / 프로필 사진 설정 (펭베)
+
+`.env`에 토큰을 넣은 뒤 아래 명령을 한 번 실행하면 봇 표시 이름을 **펭베**로, 프로필 사진을 `assets/penguin-avatar.png`(펭귄 아이콘)로 자동 설정합니다.
+
+```bash
+npm run set-profile
+```
+
+- 이름/아바타는 `client.user.setUsername()` / `client.user.setAvatar()`로 즉시 반영되며, 디스코드 클라이언트를 재시작(Ctrl+R)하면 바로 보입니다.
+- 아이폰 기본 펭귄 이모지(🐧)는 애플의 저작물이라 그대로 복제해서 넣을 수 없어, 비슷한 느낌의 자체 제작 펭귄 아이콘(`assets/penguin-avatar.svg` 원본 포함)을 기본값으로 넣어뒀습니다.
+- 아이폰에서 실제 이모지를 캡처/저장한 이미지가 있다면 그 파일을 대신 사용할 수 있습니다.
+  ```bash
+  npm run set-profile -- /path/to/penguin.png
+  ```
+- 이름은 `.env`의 `BOT_NAME`으로 바꿀 수 있습니다.
+- 디스코드는 짧은 시간 안에 이름/아바타를 반복 변경하면 제한을 걸 수 있으니, 보통 한 번만 실행하면 충분합니다.
+
 ## 참고
 
 - 유튜브/사운드클라우드 추출은 [DisTube](https://distube.js.org/) + `@distube/yt-dlp`(유튜브) + `@distube/soundcloud`(사운드클라우드) 플러그인을 사용합니다.

@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "set-profile": "node scripts/set-profile.js"
   },
   "license": "MIT",
   "dependencies": {
