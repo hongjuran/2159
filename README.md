@@ -16,7 +16,7 @@
 
 봇 초대(OAuth2 URL Generator) 시 필요한 권한/스코프:
 
-- Scope: `bot`
+- Scope: `bot`, `applications.commands` (슬래시 명령어를 쓰려면 `applications.commands`가 꼭 있어야 합니다. 빠뜨리고 초대했다면 `npm run deploy-commands` 실행 시 `Missing Access` 오류가 납니다 — 이 스코프를 추가해서 다시 초대하면 해결됩니다.)
 - Bot Permissions: `View Channels`, `Send Messages`, `Connect`, `Speak`
 
 ## 설치
