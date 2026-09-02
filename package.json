@@ -11,7 +11,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@discordjs/voice": "^0.18.0",
+    "@discordjs/voice": "^0.19.2",
     "@distube/soundcloud": "^2.0.4",
     "@distube/yt-dlp": "^2.0.1",
     "discord.js": "^14.27.0",
