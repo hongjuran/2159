@@ -46,6 +46,7 @@ client.on("messageCreate", async (message) => {
     networking.__wired = true;
     networking.on("debug", m => console.log("[networking debug]", m));
     networking.on("error", e => console.error("[networking error]", e));
+    networking.on("close", code => console.log("[networking CLOSE CODE]", code));
     networking.on("stateChange", (oldState, newState) => {
       console.log(`[networking 상태] ${oldState.code} -> ${newState.code}`);
     });
