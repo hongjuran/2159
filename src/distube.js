@@ -1,6 +1,8 @@
 const { DisTube } = require("distube");
 const { SoundCloudPlugin } = require("@distube/soundcloud");
 const { YtDlpPlugin } = require("@distube/yt-dlp");
+const { nowPlayingEmbed, addedSongEmbed } = require("./embeds");
+const { controlRow } = require("./buttons");
 
 function createDisTube(client) {
   const distube = new DisTube(client, {
@@ -10,14 +12,12 @@ function createDisTube(client) {
 
   distube
     .on("playSong", (queue, song) => {
-      queue.textChannel?.send(
-        `▶️ 재생 중: **${song.name}** (\`${song.formattedDuration}\`) - 요청: ${song.user}`
-      );
+      queue.textChannel
+        ?.send({ embeds: [nowPlayingEmbed(queue)], components: [controlRow(queue)] })
+        .catch(() => {});
     })
     .on("addSong", (queue, song) => {
-      queue.textChannel?.send(
-        `✅ 대기열에 추가됨: **${song.name}** (\`${song.formattedDuration}\`)`
-      );
+      queue.textChannel?.send({ embeds: [addedSongEmbed(song)] }).catch(() => {});
     })
     .on("finish", (queue) => {
       queue.textChannel?.send("🏁 대기열 재생이 모두 끝났습니다.");

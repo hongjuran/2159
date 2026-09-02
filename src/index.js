@@ -1,8 +1,11 @@
 require("dotenv").config();
-const { Client, GatewayIntentBits, Partials } = require("discord.js");
+const { Client, GatewayIntentBits, Partials, MessageFlags } = require("discord.js");
 const { getVoiceConnection } = require("@discordjs/voice");
 const { createDisTube } = require("./distube");
 const { commands } = require("./commands");
+const { fromMessage, fromInteraction } = require("./context");
+const { nowPlayingEmbed, queueEmbed } = require("./embeds");
+const { controlRow } = require("./buttons");
 
 const TOKEN = process.env.DISCORD_TOKEN;
 const PREFIX = process.env.COMMAND_PREFIX || "!";
@@ -58,10 +61,81 @@ client.on("messageCreate", async (message) => {
   if (!handler) return;
 
   try {
-    await handler(message, args, distube);
+    await handler(fromMessage(message), args, distube);
   } catch (error) {
     console.error(`명령어 처리 중 오류 (${commandName}):`, error);
     message.reply("명령어 처리 중 오류가 발생했습니다.").catch(() => {});
+  }
+});
+
+// 슬래시(/) 명령어 옵션을 기존 text 명령어와 동일한 args 배열로 변환한다.
+function optionsToArgs(interaction) {
+  switch (interaction.commandName) {
+    case "play":
+      return [interaction.options.getString("url", true)];
+    case "volume":
+      return [String(interaction.options.getInteger("value", true))];
+    default:
+      return [];
+  }
+}
+
+async function handleButton(interaction) {
+  const queue = distube.getQueue(interaction.guildId);
+  if (!queue) {
+    await interaction.reply({ content: "현재 재생 중인 곡이 없습니다.", flags: MessageFlags.Ephemeral });
+    return;
+  }
+
+  const action = interaction.customId.split(":")[1];
+
+  if (action === "queue") {
+    await interaction.reply({ embeds: [queueEmbed(queue)], flags: MessageFlags.Ephemeral });
+    return;
+  }
+
+  if (action === "stop") {
+    queue.stop();
+    await interaction.update({ content: "⏹️ 재생을 멈추고 대기열을 비웠습니다.", embeds: [], components: [] });
+    return;
+  }
+
+  if (action === "skip") {
+    try {
+      await queue.skip();
+    } catch {
+      await interaction.update({ content: "🏁 대기열 재생이 모두 끝났습니다.", embeds: [], components: [] });
+      return;
+    }
+  } else if (action === "pauseresume") {
+    queue.paused ? queue.resume() : queue.pause();
+  } else if (action === "shuffle") {
+    queue.shuffle();
+  }
+
+  await interaction.update({ embeds: [nowPlayingEmbed(queue)], components: [controlRow(queue)] });
+}
+
+client.on("interactionCreate", async (interaction) => {
+  try {
+    if (interaction.isChatInputCommand()) {
+      const handler = commands[interaction.commandName];
+      if (!handler) return;
+      await handler(fromInteraction(interaction), optionsToArgs(interaction), distube);
+      return;
+    }
+
+    if (interaction.isButton() && interaction.customId.startsWith("music:")) {
+      await handleButton(interaction);
+    }
+  } catch (error) {
+    console.error("인터랙션 처리 중 오류:", error);
+    const payload = { content: "명령어 처리 중 오류가 발생했습니다.", flags: MessageFlags.Ephemeral };
+    if (interaction.replied || interaction.deferred) {
+      interaction.followUp(payload).catch(() => {});
+    } else {
+      interaction.reply(payload).catch(() => {});
+    }
   }
 });
 

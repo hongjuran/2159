@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "set-profile": "node scripts/set-profile.js",
+    "deploy-commands": "node scripts/deploy-commands.js",
     "postinstall": "patch-package"
   },
   "license": "MIT",
