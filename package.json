@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "set-profile": "node scripts/set-profile.js"
+    "set-profile": "node scripts/set-profile.js",
+    "postinstall": "patch-package"
   },
   "license": "MIT",
   "dependencies": {
@@ -19,5 +20,8 @@
     "dotenv": "^16.4.5",
     "libsodium-wrappers": "^0.7.15",
     "opusscript": "^0.1.1"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1"
   }
 }
