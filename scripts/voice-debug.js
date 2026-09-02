@@ -38,13 +38,26 @@ client.on("messageCreate", async (message) => {
     channelId: channel.id,
     guildId: channel.guild.id,
     adapterCreator: channel.guild.voiceAdapterCreator,
+    debug: true,
   });
+
+  const wireNetworkingDebug = networking => {
+    if (!networking || networking.__wired) return;
+    networking.__wired = true;
+    networking.on("debug", m => console.log("[networking debug]", m));
+    networking.on("error", e => console.error("[networking error]", e));
+    networking.on("stateChange", (oldState, newState) => {
+      console.log(`[networking 상태] ${oldState.code} -> ${newState.code}`);
+    });
+  };
 
   connection.on("debug", m => console.log("[voice debug]", m));
   connection.on("error", e => console.error("[voice error]", e));
   connection.on("stateChange", (oldState, newState) => {
     console.log(`[상태 변화] ${oldState.status} -> ${newState.status}`);
+    wireNetworkingDebug(newState.networking);
   });
+  wireNetworkingDebug(connection.state.networking);
 
   try {
     await entersState(connection, VoiceConnectionStatus.Ready, 30000);
