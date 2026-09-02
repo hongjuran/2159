@@ -276,31 +276,52 @@
   // ---------- template defs ----------
   function buildTemplates(){
     return [
-      tpl('heart',    '하트뿅뿅',       'grid2x2', ['#fff0f8','#ffd3ea'], 'hearts', '#ff2e9a', 'dashed', '#ff2e9a', ['💗','💕','💖','💘'], 'LOVE LOVE', '#ff2e9a'),
-      tpl('holo',     '은하수 홀로그램', 'strip4',  ['#cdb4ff','#9ee7ff','#ffd3f6'], 'stars', '#ffffff', 'chunky', '#a06cff', ['✨','🌙','⭐️','✨'], 'GALAXY GIRL', '#7b3fe4'),
-      tpl('film',     '시네마 필름',     'strip4',  ['#1c1c22','#2b2b34'], 'none', '#000', 'film', '#111', ['🎬','🎞️','🎬','🎞️'], 'NOW PLAYING', '#ffffff'),
-      tpl('cherry',   '체리콕',         'grid2x2', ['#ffe3e3','#fff'], 'polka', '#ff3b3b', 'dashed', '#c81d1d', ['🍒','🥤','🍒','🥤'], 'CHERRY COKE', '#c81d1d'),
-      tpl('teddy',    '곰돌이 러버',     'single',  ['#fff3e0','#f3d9b5'], 'none', '#000', 'chunky', '#a5682a', ['🧸','🍯','🧸','🍯'], 'TEDDY BEAR CLUB', '#8a5423'),
-      tpl('cyber',    '네온 사이버',     'grid1x3', ['#050510','#0c0c22'], 'grid', '#39ff14', 'chunky', '#39ff14', ['🕹️','💻','🕹️','💻'], 'SYSTEM ONLINE', '#39ff14'),
-      tpl('cloud',    '구름캔디',       'polaroid', ['#eaf6ff','#cfeeff'], 'none', '#fff', 'dashed', '#5aa9e6', ['☁️','🌤️','☁️','🌤️'], 'SO FLUFFY', '#3f88c5'),
-      tpl('gameboy',  '레트로 게임보이', 'grid2x2', ['#dfe7c8','#c9d6a8'], 'checker', '#7a8a4a', 'chunky', '#4c5a2e', ['🎮','👾','🎮','👾'], 'PLAYER ONE', '#3a441f'),
-      tpl('polaroid', '폴라로이드 클래식', 'polaroid', ['#ffffff','#f3f3f3'], 'none', '#000', 'thin', '#222', [], '2000.07.18', '#222222'),
-      tpl('leopard',  '레오파드 프린트', 'grid2x2', ['#f1dcb0','#e6cd94'], 'leopard', '#5b3a1a', 'chunky', '#5b3a1a', ['🐆','🧡','🐆','🧡'], 'WILD ONE', '#5b3a1a'),
-      tpl('disco',    '디스코볼',       'strip4',  ['#2b2140','#6a4ca0','#c9c9f2'], 'sparkle', '#ffffff', 'tape', '#c9c9f2', ['🪩','🎶','🪩','🎶'], 'DISCO NIGHT', '#2b2140'),
-      tpl('strawberry','스트로베리밀크', 'grid2x2', ['#ffe6f0','#ffffff'], 'stripes', '#ff8fc0', 'dashed', '#ff5fa8', ['🍓','🥛','🍓','🥛'], 'STRAWBERRY MILK', '#ff2e8a'),
-      tpl('chrome',   '크롬 실버',       'single',  ['#e3e6ee','#9aa3b8'], 'none', '#fff', 'chunky', '#5b6478', ['💿','⚙️','💿','⚙️'], 'Y2K CHROME', '#3a4258'),
-      tpl('rainbow',  '레인보우 팝',     'strip4',  ['#ff9a9e','#fecfef','#a1c4fd','#c2e9fb'], 'stars', '#ffffff', 'chunky', '#ff6fae', ['🌈','☀️','🌈','☀️'], 'RAINBOW VIBES', '#ff2e9a'),
-      tpl('checker',  '체커보드',       'grid2x2', ['#ffffff','#eaeaea'], 'checker', '#111111', 'chunky', '#111111', ['⚫','⚪','⚫','⚪'], 'CHECK IT OUT', '#111111'),
-      tpl('floppy',   '플로피디스크',   'single',  ['#bcd2ff','#7fa6ff'], 'none', '#fff', 'chunky', '#2848a0', ['💾','📀','💾','📀'], 'SAVE THE MOMENT', '#1c3170'),
-      tpl('butterfly','버터플라이 가든', 'grid1x3', ['#f1e6ff','#dcc6ff'], 'none', '#fff', 'dashed', '#8a5fd6', ['🦋','🌸','🦋','🌸'], 'FLY AWAY', '#6a3fc0'),
-      tpl('sunset',   '선셋 오렌지',     'polaroid', ['#ffd59e','#ff8a65','#ff6f91'], 'none', '#fff', 'thin', '#c1440e', ['🌅','🧡','🌅','🧡'], 'GOLDEN HOUR', '#a53a10'),
-      tpl('candy',    '캔디팝 별사탕',   'grid2x2', ['#fff2fb','#e9f7ff'], 'sparkle', '#ff9ad5', 'dashed', '#ff9ad5', ['🍬','⭐️','🍭','⭐️'], 'CANDY POP', '#ff5fb8'),
-      tpl('millennium','밀레니엄버그',  'strip4',  ['#000000','#001a00'], 'grid', '#00ff66', 'zigzag', '#00ff66', ['💻','⚠️','💻','⚠️'], 'Y2K BUG ALERT', '#00ff66')
+      tpl('heart',    '하트뿅뿅',       'grid2x2', ['#fff0f8','#ffb6da'], 'hearts', '#ff2e9a', 'dashed', '#ff2e9a',
+          ['💗','💕','💖','💘','✨','🎀'], 'STICKER SHOT', 'LOVE LOVE', '#ff2e9a', ['사랑해','LOVE','뿅뿅💕']),
+      tpl('holo',     '은하수 홀로그램', 'strip4',  ['#cdb4ff','#9ee7ff','#ffd3f6'], 'stars', '#ffffff', 'chunky', '#a06cff',
+          ['✨','🌙','⭐️','💫','🪐','☄️'], 'GALAXY BOOTH', 'GALAXY GIRL', '#7b3fe4', ['반짝반짝','GALAXY','별빛소녀']),
+      tpl('film',     '시네마 필름',     'strip4',  ['#1c1c22','#2b2b34'], 'stars', '#ffffff', 'film', '#111',
+          ['🎬','🎞️','📽️','🍿','⭐️','🎟️'], 'CINEMA BOOTH', 'NOW PLAYING', '#ffffff', ['NOW PLAYING','오늘의 필름','CUT!']),
+      tpl('cherry',   '체리콕',         'grid2x2', ['#ffe3e3','#ffffff'], 'polka', '#ff3b3b', 'dashed', '#c81d1d',
+          ['🍒','🥤','🍬','❤️','✨','🫧'], 'CHERRY BOOTH', 'CHERRY COKE', '#c81d1d', ['체리충전','상큼해','COKE TIME']),
+      tpl('teddy',    '곰돌이 러버',     'single',  ['#fff3e0','#f3d9b5'], 'hearts', '#c98a3f', 'chunky', '#a5682a',
+          ['🧸','🍯','🎀','☕️','💛','✨'], 'TEDDY PHOTO', 'TEDDY BEAR CLUB', '#8a5423', ['곰돌이야','포근해','HUG ME']),
+      tpl('cyber',    '네온 사이버',     'grid1x3', ['#050510','#0c0c22'], 'grid', '#39ff14', 'chunky', '#39ff14',
+          ['🕹️','💻','📼','🔌','💾','⚡️'], 'CYBER BOOTH', 'SYSTEM ONLINE', '#39ff14', ['ONLINE','접속완료','2000']),
+      tpl('cloud',    '구름캔디',       'polaroid', ['#eaf6ff','#cfeeff'], 'stars', '#ffffff', 'dashed', '#5aa9e6',
+          ['☁️','🌤️','💙','✨','🕊️','🩵'], 'CLOUD BOOTH', 'SO FLUFFY', '#3f88c5', ['몽글몽글','SO SOFT','구름위']),
+      tpl('gameboy',  '레트로 게임보이', 'grid2x2', ['#dfe7c8','#c9d6a8'], 'checker', '#7a8a4a', 'chunky', '#4c5a2e',
+          ['🎮','👾','🕹️','⭐️','🔋','💥'], 'PLAYER BOOTH', 'PLAYER ONE', '#3a441f', ['GAME ON','레벨업','PLAYER1']),
+      tpl('polaroid', '폴라로이드 클래식', 'polaroid', ['#ffffff','#f3f3f3'], 'none', '#000', 'thin', '#222',
+          ['📷','🖇️','✨','🤍','⏳','🕰️'], 'CLASSIC PHOTO', '2000.07.18', '#222222', ['우리 추억','그 시절','다시봐도 좋아']),
+      tpl('leopard',  '레오파드 프린트', 'grid2x2', ['#f1dcb0','#e6cd94'], 'leopard', '#5b3a1a', 'chunky', '#5b3a1a',
+          ['🐆','🧡','💥','⭐️','✨','🔥'], 'WILD BOOTH', 'WILD ONE', '#5b3a1a', ['와일드하게','야생소녀','GRRR']),
+      tpl('disco',    '디스코볼',       'strip4',  ['#2b2140','#6a4ca0','#c9c9f2'], 'sparkle', '#ffffff', 'tape', '#c9c9f2',
+          ['🪩','🎶','✨','💃','⭐️','🎉'], 'DISCO BOOTH', 'DISCO NIGHT', '#2b2140', ['신나는 밤','DANCE','반짝반짝']),
+      tpl('strawberry','스트로베리밀크', 'grid2x2', ['#ffe6f0','#ffffff'], 'stripes', '#ff8fc0', 'dashed', '#ff5fa8',
+          ['🍓','🥛','💗','✨','🎀','🍒'], 'MILK BOOTH', 'STRAWBERRY MILK', '#ff2e8a', ['딸기맛','달달해','MILKY']),
+      tpl('chrome',   '크롬 실버',       'single',  ['#e3e6ee','#9aa3b8'], 'sparkle', '#ffffff', 'chunky', '#5b6478',
+          ['💿','⚙️','🔩','✨','🤍','⭐️'], 'CHROME BOOTH', 'Y2K CHROME', '#3a4258', ['Y2K 감성','금속느낌','미래소녀']),
+      tpl('rainbow',  '레인보우 팝',     'strip4',  ['#ff9a9e','#fecfef','#a1c4fd','#c2e9fb'], 'stars', '#ffffff', 'chunky', '#ff6fae',
+          ['🌈','☀️','✨','💛','💙','💗'], 'RAINBOW BOOTH', 'RAINBOW VIBES', '#ff2e9a', ['무지개떴다','컬러풀','행복해']),
+      tpl('checker',  '체커보드',       'grid2x2', ['#ffffff','#eaeaea'], 'checker', '#111111', 'chunky', '#111111',
+          ['⚫️','⚪️','✨','🖤','🤍','⭐️'], 'CHECK BOOTH', 'CHECK IT OUT', '#111111', ['체크체크','힙하게','2000s']),
+      tpl('floppy',   '플로피디스크',   'single',  ['#bcd2ff','#7fa6ff'], 'stars', '#ffffff', 'chunky', '#2848a0',
+          ['💾','📀','🔌','⭐️','💙','✨'], 'SAVE BOOTH', 'SAVE THE MOMENT', '#1c3170', ['저장완료','추억저장','SAVE']),
+      tpl('butterfly','버터플라이 가든', 'grid1x3', ['#f1e6ff','#dcc6ff'], 'hearts', '#8a5fd6', 'dashed', '#8a5fd6',
+          ['🦋','🌸','🌷','✨','💜','🤍'], 'GARDEN BOOTH', 'FLY AWAY', '#6a3fc0', ['나비효과','꽃길만걷자','봄이좋아']),
+      tpl('sunset',   '선셋 오렌지',     'polaroid', ['#ffd59e','#ff8a65','#ff6f91'], 'stars', '#ffffff', 'thin', '#c1440e',
+          ['🌅','🧡','☀️','✨','💛','🌇'], 'SUNSET BOOTH', 'GOLDEN HOUR', '#a53a10', ['노을질때','황금시간','감성터짐']),
+      tpl('candy',    '캔디팝 별사탕',   'grid2x2', ['#fff2fb','#e9f7ff'], 'sparkle', '#ff9ad5', 'dashed', '#ff9ad5',
+          ['🍬','⭐️','🍭','🎀','💗','✨'], 'CANDY BOOTH', 'CANDY POP', '#ff5fb8', ['달콤한날','사탕같은너','CANDY']),
+      tpl('millennium','밀레니엄버그',  'strip4',  ['#000000','#001a00'], 'grid', '#00ff66', 'zigzag', '#00ff66',
+          ['💻','⚠️','📼','⭐️','💚','🖥️'], 'Y2K BOOTH', 'Y2K BUG ALERT', '#00ff66', ['버그주의','Y2K','밀레니엄'])
     ];
   }
-  function tpl(id,name,layout,bgStops,pattern,patternColor,borderStyle,borderColor,corners,stampText,stampColor){
+  function tpl(id,name,layout,bgStops,pattern,patternColor,borderStyle,borderColor,stickers,brand,stampText,stampColor,captions){
     return {id:id,name:name,layout:layout,bgStops:bgStops,pattern:pattern,patternColor:patternColor,
-             borderStyle:borderStyle,borderColor:borderColor,corners:corners,stampText:stampText,stampColor:stampColor};
+             borderStyle:borderStyle,borderColor:borderColor,stickers:stickers,brand:brand,
+             stampText:stampText,stampColor:stampColor,captions:captions};
   }
   function getTpl(id){ for(var i=0;i<templates.length;i++){ if(templates[i].id===id) return templates[i]; } return templates[0]; }
 
@@ -374,31 +395,31 @@
   function drawPattern(ctx,type,color,seed){
     if (type==='none') return;
     ctx.save();
-    ctx.globalAlpha = 0.28;
+    ctx.globalAlpha = 0.4;
     ctx.fillStyle = color; ctx.strokeStyle = color;
-    var step = 46;
+    var step = 34;
     if (type==='polka'){
-      for (var y=20; y<H; y+=step){
-        for (var x=20; x<W; x+=step){
+      for (var y=16; y<H; y+=step){
+        for (var x=16; x<W; x+=step){
           var off = (Math.floor(y/step)%2)*step/2;
-          ctx.beginPath(); ctx.arc(x+off,y,6,0,Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(x+off,y,7,0,Math.PI*2); ctx.fill();
         }
       }
     } else if (type==='hearts'){
-      for (var y2=20; y2<H; y2+=step){
-        for (var x2=20; x2<W; x2+=step){
+      for (var y2=16; y2<H; y2+=step){
+        for (var x2=16; x2<W; x2+=step){
           var off2 = (Math.floor(y2/step)%2)*step/2;
-          heartPath(ctx, x2+off2, y2, 7); ctx.fill();
+          heartPath(ctx, x2+off2, y2, 8); ctx.fill();
         }
       }
     } else if (type==='stars' || type==='sparkle'){
-      ctx.lineWidth=2;
-      var n = type==='sparkle' ? 90 : 60;
+      ctx.lineWidth=2.2;
+      var n = type==='sparkle' ? 150 : 110;
       for (var i=0;i<n;i++){
         var rx = pseudoRand(seed+i*7)*W;
         var ry = pseudoRand(seed+i*13+1)*H;
-        var rr = 4+pseudoRand(seed+i*19+2)*7;
-        ctx.globalAlpha = 0.2+pseudoRand(seed+i)*0.35;
+        var rr = 4+pseudoRand(seed+i*19+2)*8;
+        ctx.globalAlpha = 0.25+pseudoRand(seed+i)*0.45;
         starPath(ctx,rx,ry,rr); ctx.stroke();
       }
     } else if (type==='checker'){
@@ -413,15 +434,15 @@
       for (var gx=0; gx<W; gx+=36){ ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke(); }
       for (var gy=0; gy<H; gy+=36){ ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(W,gy); ctx.stroke(); }
     } else if (type==='stripes'){
-      ctx.globalAlpha=0.25;
-      for (var sx2=-H; sx2<W; sx2+=34){
+      ctx.globalAlpha=0.28;
+      for (var sx2=-H; sx2<W; sx2+=30){
         ctx.save(); ctx.translate(sx2,0); ctx.rotate(Math.PI/4);
-        ctx.fillRect(0,-20,14,H*2); ctx.restore();
+        ctx.fillRect(0,-20,15,H*2); ctx.restore();
       }
     } else if (type==='leopard'){
-      for (var i2=0;i2<70;i2++){
+      for (var i2=0;i2<90;i2++){
         var lx = pseudoRand(seed+i2*3)*W, ly = pseudoRand(seed+i2*5+1)*H;
-        ctx.globalAlpha = 0.5;
+        ctx.globalAlpha = 0.55;
         ctx.beginPath();
         for (var k=0;k<5;k++){
           var ang=k*(Math.PI*2/5);
@@ -436,6 +457,30 @@
   function pseudoRand(seed){
     var x = Math.sin(seed*999)*10000;
     return x - Math.floor(x);
+  }
+
+  // extra shimmer glints scattered on top of the pattern, skipped over photo slots
+  function drawGlints(ctx,slots,seed){
+    ctx.save();
+    var colors = ['#ffffff','#fff8c0','#ffd9f2'];
+    for (var i=0;i<26;i++){
+      var x = pseudoRand(seed+i*3.1+500)*W;
+      var y = pseudoRand(seed+i*5.7+500)*H;
+      if (pointInSlots(x,y,slots,4)) continue;
+      var r = 3+pseudoRand(seed+i*2.3)*5;
+      ctx.globalAlpha = 0.35+pseudoRand(seed+i)*0.45;
+      ctx.strokeStyle = colors[i%colors.length];
+      ctx.lineWidth = 1.6;
+      starPath(ctx,x,y,r); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function pointInSlots(x,y,slots,pad){
+    for (var i=0;i<slots.length;i++){
+      var s = slots[i];
+      if (x>s.x-pad && x<s.x+s.w+pad && y>s.y-pad && y<s.y+s.h+pad) return true;
+    }
+    return false;
   }
 
   function drawOuterBorder(ctx,tplDef){
@@ -484,39 +529,119 @@
     ctx.restore();
   }
 
-  function drawCorners(ctx,tplDef){
-    if (!tplDef.corners || !tplDef.corners.length) return;
-    var size = 40;
-    ctx.font = size+'px sans-serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    var pts = [[46,46],[W-46,46],[46,H-46],[W-46,H-46]];
-    for (var i=0;i<4;i++){
-      var e = tplDef.corners[i % tplDef.corners.length];
-      ctx.fillText(e, pts[i][0], pts[i][1]);
-    }
+  // scalloped "die-cut sticker" edge traced around a photo slot, on top of its border
+  function drawScallopEdge(ctx,rect){
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    var r = 5, gap = 15;
+    var perim = [];
+    for (var x=rect.x; x<=rect.x+rect.w; x+=gap) perim.push([x,rect.y]);
+    for (var y=rect.y; y<=rect.y+rect.h; y+=gap) perim.push([rect.x+rect.w,y]);
+    for (var x2=rect.x+rect.w; x2>=rect.x; x2-=gap) perim.push([x2,rect.y+rect.h]);
+    for (var y2=rect.y+rect.h; y2>=rect.y; y2-=gap) perim.push([rect.x,y2]);
+    ctx.globalAlpha = 0.9;
+    perim.forEach(function(p){ ctx.beginPath(); ctx.arc(p[0],p[1],r,0,Math.PI*2); ctx.fill(); });
+    ctx.restore();
   }
 
-  function drawStamp(ctx,tplDef){
-    if (!tplDef.stampText) return;
+  // machine-ticket style header pill: brand wordmark + faux Y2K timestamp
+  function drawHeaderBar(ctx,tplDef,seed){
+    var yr = 2000 + Math.floor(pseudoRand(seed+11)*9);
+    var mo = 1 + Math.floor(pseudoRand(seed+22)*12);
+    var da = 1 + Math.floor(pseudoRand(seed+33)*28);
+    var hh = Math.floor(pseudoRand(seed+44)*24);
+    var mm = Math.floor(pseudoRand(seed+55)*60);
+    function p2(n){ return (n<10?'0':'')+n; }
+    var stamp = yr+'.'+p2(mo)+'.'+p2(da)+' '+p2(hh)+':'+p2(mm);
+    var text = tplDef.brand + '   ' + stamp;
+    ctx.save();
+    ctx.font = "bold 14px 'Jua', sans-serif";
+    var tw = ctx.measureText(text).width + 28;
+    var bx = W/2 - tw/2, by = 9, bh = 24;
+    roundRectPath(ctx, bx, by, tw, bh, 12);
+    ctx.fillStyle = 'rgba(255,255,255,.82)';
+    ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = tplDef.stampColor; ctx.stroke();
+    ctx.fillStyle = tplDef.stampColor;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(text, W/2, by+bh/2+1);
+    ctx.restore();
+  }
+
+  // dozens of clip-art stickers scattered across the whole sheet, spilling onto the photos
+  function drawStickerScatter(ctx,tplDef,slots,seed){
+    var pool = tplDef.stickers;
+    ctx.save();
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    var count = 22;
+    for (var i=0;i<count;i++){
+      var x = pseudoRand(seed+i*4.7)*W;
+      var y = pseudoRand(seed+i*8.3+1)*H;
+      var deepInside = false;
+      for (var s=0;s<slots.length;s++){
+        var r = slots[s];
+        if (x>r.x+r.w*0.22 && x<r.x+r.w*0.78 && y>r.y+r.h*0.22 && y<r.y+r.h*0.78){ deepInside = true; break; }
+      }
+      if (deepInside && pseudoRand(seed+i*1.9+2)>0.35) continue; // bias stickers away from the middle of faces
+      var e = pool[i % pool.length];
+      var size = 22 + pseudoRand(seed+i*3.3+3)*22;
+      var rot = (pseudoRand(seed+i*6.1+4)-0.5)*0.9;
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.rotate(rot);
+      ctx.font = size+'px sans-serif';
+      ctx.globalAlpha = 0.88;
+      ctx.fillText(e,0,0);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // main title stamp + a few handwritten-style captions scattered near the photos
+  function drawCaptions(ctx,tplDef,slots,seed){
     var y = STAMP_Y[tplDef.layout] || (H-90);
     ctx.save();
+    ctx.lineJoin='round';
     ctx.font = "bold 40px 'Jua', sans-serif";
     ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.lineJoin='round';
-    ctx.lineWidth = 10;
-    ctx.strokeStyle = '#ffffff';
-    ctx.strokeText(tplDef.stampText, W/2, y);
+    ctx.save();
+    ctx.translate(W/2,y); ctx.rotate(-0.03);
+    ctx.lineWidth = 10; ctx.strokeStyle = '#ffffff';
+    ctx.strokeText(tplDef.stampText, 0, 0);
     ctx.fillStyle = tplDef.stampColor;
-    ctx.fillText(tplDef.stampText, W/2, y);
+    ctx.fillText(tplDef.stampText, 0, 0);
+    ctx.restore();
+
+    var caps = tplDef.captions || [];
+    caps.forEach(function(text,i){
+      var slot = slots[(i*2+1) % slots.length];
+      var atRight = i%2===0;
+      var px = atRight ? slot.x + slot.w - 8 : slot.x + 8;
+      var py = slot.y + slot.h - 14 - i*2;
+      var rot = ((i%2===0)?1:-1) * (0.1+pseudoRand(seed+i*9+7)*0.12);
+      ctx.save();
+      ctx.translate(px,py);
+      ctx.rotate(rot);
+      ctx.font = "bold 22px 'Gaegu', sans-serif";
+      ctx.textAlign = atRight ? 'right':'left';
+      ctx.lineWidth = 6; ctx.strokeStyle = '#ffffff';
+      ctx.strokeText(text,0,0);
+      ctx.fillStyle = tplDef.stampColor;
+      ctx.fillText(text,0,0);
+      ctx.restore();
+    });
     ctx.restore();
   }
 
   function renderTemplateTo(ctx, tplDef, photoList, seed){
+    seed = seed || 1;
     ctx.clearRect(0,0,W,H);
     fillBackground(ctx,tplDef);
-    drawPattern(ctx,tplDef.pattern,tplDef.patternColor, seed||1);
+    drawPattern(ctx,tplDef.pattern,tplDef.patternColor, seed);
 
     var slots = LAYOUTS[tplDef.layout];
+    drawGlints(ctx,slots,seed);
+
     slots.forEach(function(rect,i){
       var img = photoList.length ? photoList[i % photoList.length] : null;
       ctx.save();
@@ -536,11 +661,14 @@
       roundRectPath(ctx, rect.x+3, rect.y+3, rect.w-6, rect.h-6, 13);
       ctx.stroke();
       ctx.restore();
+
+      drawScallopEdge(ctx,rect);
     });
 
     drawOuterBorder(ctx,tplDef);
-    drawCorners(ctx,tplDef);
-    drawStamp(ctx,tplDef);
+    drawStickerScatter(ctx,tplDef,slots,seed);
+    drawHeaderBar(ctx,tplDef,seed);
+    drawCaptions(ctx,tplDef,slots,seed);
   }
 
   var renderSeed = 1;
