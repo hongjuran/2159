@@ -7,21 +7,56 @@ function requireVoiceChannel(message) {
   return voiceChannel;
 }
 
+// 유튜브 "믹스/라디오" 자동재생 링크(list=RD...)는 yt-dlp가 영상 1개 대신
+// 믹스 전체(수백~수천 개)를 추출하려다 실패하므로, 재생 전에 잘라낸다.
+function sanitizeYoutubeQuery(query) {
+  let url;
+  try {
+    url = new URL(query);
+  } catch {
+    return query;
+  }
+
+  const isYoutube = /(^|\.)youtube\.com$/.test(url.hostname) || url.hostname === "youtu.be";
+  if (!isYoutube) return query;
+
+  const listParam = url.searchParams.get("list");
+  if (listParam && /^RD/.test(listParam)) {
+    url.searchParams.delete("list");
+    url.searchParams.delete("start_radio");
+    url.searchParams.delete("index");
+    return url.toString();
+  }
+  return query;
+}
+
 const commands = {
   async play(message, args, distube) {
     const voiceChannel = requireVoiceChannel(message);
     if (!voiceChannel) return;
 
-    const query = args.join(" ");
-    if (!query) {
+    const rawQuery = args.join(" ");
+    if (!rawQuery) {
       message.reply("유튜브나 사운드클라우드 URL을 함께 입력해 주세요. 예: `!play <URL>`");
       return;
     }
 
-    await distube.play(voiceChannel, query, {
-      textChannel: message.channel,
-      member: message.member,
-    });
+    const query = sanitizeYoutubeQuery(rawQuery);
+
+    try {
+      await distube.play(voiceChannel, query, {
+        textChannel: message.channel,
+        member: message.member,
+      });
+    } catch (error) {
+      if (error?.errorCode === "YTDLP_ERROR") {
+        message.reply(
+          "⚠️ 이 링크는 재생할 수 없어요. 유튜브 '믹스/라디오' 자동재생 목록 링크일 수 있습니다. 영상 하단의 **공유** 버튼으로 받은 일반 링크로 다시 시도해 주세요."
+        );
+        return;
+      }
+      throw error;
+    }
   },
 
   async skip(message, _args, distube) {
