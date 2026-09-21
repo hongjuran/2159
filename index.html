@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>주민등록번호 마스킹 도구</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app__header">
+      <h1>주민등록번호 마스킹 도구</h1>
+      <p class="app__subtitle">
+        파일을 첨부하고 <strong>실행</strong> 버튼을 누르면 파일 안의 주민등록번호를 자동으로 찾아 마스킹합니다.
+      </p>
+      <p class="app__notice">
+        🔒 모든 처리는 이 브라우저 안에서만 이루어지며, 파일 내용은 서버로 전송되지 않습니다.
+      </p>
+    </header>
+
+    <main class="app__main">
+      <section class="panel">
+        <div id="dropZone" class="dropzone">
+          <input type="file" id="fileInput" accept=".txt,.csv,.log,.json,.md,.tsv,.xlsx,.xls" hidden />
+          <div class="dropzone__icon">📎</div>
+          <p class="dropzone__text">
+            여기로 파일을 끌어다 놓거나 <button type="button" id="browseBtn" class="link-btn">파일 선택</button>
+          </p>
+          <p class="dropzone__hint">지원 형식: TXT, CSV, TSV, LOG, JSON, MD, XLSX, XLS</p>
+          <p id="fileName" class="dropzone__filename"></p>
+        </div>
+
+        <div class="options">
+          <label for="encodingSelect">텍스트 파일 인코딩</label>
+          <select id="encodingSelect">
+            <option value="utf-8">UTF-8 (기본)</option>
+            <option value="euc-kr">EUC-KR / CP949</option>
+          </select>
+        </div>
+
+        <button id="runBtn" class="run-btn" disabled>▶ 실행</button>
+      </section>
+
+      <section id="resultPanel" class="panel result-panel" hidden>
+        <div class="result-summary" id="resultSummary"></div>
+
+        <div id="textResult" hidden>
+          <label class="result-label">마스킹 결과 미리보기</label>
+          <textarea id="maskedTextarea" class="masked-textarea" readonly></textarea>
+        </div>
+
+        <div id="excelResult" hidden>
+          <label class="result-label">마스킹 결과 미리보기 (첫 번째 시트)</label>
+          <div id="excelPreview" class="excel-preview"></div>
+        </div>
+
+        <button id="downloadBtn" class="download-btn">⬇ 마스킹된 파일 다운로드</button>
+      </section>
+
+      <section id="errorPanel" class="panel error-panel" hidden>
+        <p id="errorText"></p>
+      </section>
+    </main>
+
+    <footer class="app__footer">
+      <p>
+        마스킹 규칙: <code>YYMMDD-N######</code> 형식의 13자리 주민등록번호에서 생년월일 6자리와 뒤 첫 번째 숫자(성별/세기 구분)만 남기고
+        나머지 6자리를 <code>*</code>로 대체합니다. (예: 901231-1234567 → 901231-1******)
+      </p>
+    </footer>
+  </div>
+
+  <script src="js/xlsx.full.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

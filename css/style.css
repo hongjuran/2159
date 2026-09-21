@@ -1,0 +1,235 @@
+:root {
+  --bg: #f5f6f8;
+  --panel-bg: #ffffff;
+  --border: #dfe3e8;
+  --text: #1f2430;
+  --text-muted: #6b7280;
+  --accent: #2f6fed;
+  --accent-hover: #2559c7;
+  --success-bg: #eef7ee;
+  --success-border: #b7e0b8;
+  --error-bg: #fdecec;
+  --error-border: #f3b4b4;
+  --error-text: #b3261e;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.app__header h1 {
+  font-size: 26px;
+  margin: 0 0 8px;
+}
+
+.app__subtitle {
+  color: var(--text-muted);
+  margin: 0 0 8px;
+  line-height: 1.6;
+}
+
+.app__notice {
+  display: inline-block;
+  font-size: 13px;
+  color: #2f6fed;
+  background: #eaf1ff;
+  border: 1px solid #cfe0ff;
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin-bottom: 28px;
+}
+
+.panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.dropzone {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 36px 20px;
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.dropzone.dropzone--active {
+  border-color: var(--accent);
+  background: #f3f7ff;
+}
+
+.dropzone__icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.dropzone__text {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.dropzone__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dropzone__filename {
+  margin: 12px 0 0;
+  font-weight: 600;
+  color: var(--accent);
+  word-break: break-all;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  text-decoration: underline;
+  font: inherit;
+  cursor: pointer;
+}
+
+.options {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.options select {
+  font: inherit;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+}
+
+.run-btn {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.run-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.run-btn:disabled {
+  background: #b9c3d6;
+  cursor: not-allowed;
+}
+
+.result-panel {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+}
+
+.result-summary {
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.result-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.masked-textarea {
+  width: 100%;
+  min-height: 220px;
+  resize: vertical;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-family: "SFMono-Regular", Consolas, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: #fff;
+  color: var(--text);
+}
+
+.excel-preview {
+  overflow: auto;
+  max-height: 320px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.excel-preview table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.excel-preview td,
+.excel-preview th {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  white-space: nowrap;
+}
+
+.download-btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent);
+  background: #fff;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.download-btn:hover {
+  background: #f3f7ff;
+}
+
+.error-panel {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+  color: var(--error-text);
+}
+
+.app__footer {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.app__footer code {
+  background: #eef0f3;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
