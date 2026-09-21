@@ -19,6 +19,7 @@
   const browseBtn = document.getElementById("browseBtn");
   const fileNameEl = document.getElementById("fileName");
   const encodingSelect = document.getElementById("encodingSelect");
+  const maskStyleSelect = document.getElementById("maskStyleSelect");
   const runBtn = document.getElementById("runBtn");
   const progressText = document.getElementById("progressText");
 
@@ -65,10 +66,11 @@
   }
 
   function maskText(text) {
+    const fill = maskStyleSelect.value === "block" ? "█".repeat(6) : "*".repeat(6);
     let count = 0;
     const masked = text.replace(RRN_REGEX, (_match, front, sep, genderDigit) => {
       count += 1;
-      return `${front}${sep}${genderDigit}******`;
+      return `${front}${sep}${genderDigit}${fill}`;
     });
     return { masked, count };
   }
