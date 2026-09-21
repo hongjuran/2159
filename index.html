@@ -21,12 +21,12 @@
     <main class="app__main">
       <section class="panel">
         <div id="dropZone" class="dropzone">
-          <input type="file" id="fileInput" accept=".txt,.csv,.log,.json,.md,.tsv,.xlsx,.xls" hidden />
+          <input type="file" id="fileInput" accept=".txt,.csv,.log,.json,.md,.tsv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg,.bmp,.webp" hidden />
           <div class="dropzone__icon">📎</div>
           <p class="dropzone__text">
             여기로 파일을 끌어다 놓거나 <button type="button" id="browseBtn" class="link-btn">파일 선택</button>
           </p>
-          <p class="dropzone__hint">지원 형식: TXT, CSV, TSV, LOG, JSON, MD, XLSX, XLS</p>
+          <p class="dropzone__hint">지원 형식: TXT, CSV, TSV, LOG, JSON, MD, XLSX, XLS, PDF, PNG, JPG, BMP, WEBP</p>
           <p id="fileName" class="dropzone__filename"></p>
         </div>
 
@@ -38,7 +38,14 @@
           </select>
         </div>
 
+        <p class="options-note">
+          이미지·스캔 PDF는 문자 인식(OCR)으로 번호 위치를 찾아 검게 칠해 가립니다. 인식 정확도는 이미지 화질에 따라
+          달라질 수 있으니, 다운로드 전 미리보기에서 마스킹이 제대로 됐는지 꼭 확인하세요. OCR 엔진은 최초 실행 시
+          한 번만 인터넷에서 내려받습니다(파일 내용 자체는 전송되지 않습니다).
+        </p>
+
         <button id="runBtn" class="run-btn" disabled>▶ 실행</button>
+        <p id="progressText" class="progress-text" hidden></p>
       </section>
 
       <section id="resultPanel" class="panel result-panel" hidden>
@@ -52,6 +59,18 @@
         <div id="excelResult" hidden>
           <label class="result-label">마스킹 결과 미리보기 (첫 번째 시트)</label>
           <div id="excelPreview" class="excel-preview"></div>
+        </div>
+
+        <div id="canvasResult" hidden>
+          <label class="result-label" id="canvasResultLabel">마스킹 결과 미리보기</label>
+          <div class="canvas-preview">
+            <canvas id="previewCanvas"></canvas>
+          </div>
+          <div id="pageNav" class="page-nav" hidden>
+            <button type="button" id="prevPageBtn" class="page-nav__btn">◀ 이전 페이지</button>
+            <span id="pageIndicator"></span>
+            <button type="button" id="nextPageBtn" class="page-nav__btn">다음 페이지 ▶</button>
+          </div>
         </div>
 
         <button id="downloadBtn" class="download-btn">⬇ 마스킹된 파일 다운로드</button>
@@ -71,6 +90,9 @@
   </div>
 
   <script src="js/xlsx.full.min.js"></script>
+  <script src="js/pdf.min.js"></script>
+  <script src="js/pdf-lib.min.js"></script>
+  <script src="js/tesseract/tesseract.min.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

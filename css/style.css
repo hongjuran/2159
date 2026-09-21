@@ -125,6 +125,64 @@ body {
   color: var(--text);
 }
 
+.options-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  background: #f7f8fa;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0 0 16px;
+}
+
+.progress-text {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.canvas-preview {
+  overflow: auto;
+  max-height: 480px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: repeating-conic-gradient(#f0f1f3 0% 25%, #fff 0% 50%) 50% / 16px 16px;
+  text-align: center;
+  padding: 8px;
+}
+
+.canvas-preview canvas {
+  max-width: 100%;
+  height: auto;
+  display: inline-block;
+}
+
+.page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.page-nav__btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  cursor: pointer;
+}
+
+.page-nav__btn:disabled {
+  color: #b9c3d6;
+  cursor: not-allowed;
+}
+
 .run-btn {
   width: 100%;
   padding: 12px 16px;
