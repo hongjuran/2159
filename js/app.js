@@ -840,7 +840,7 @@
     fileProgressLabel = "";
     setProgress(null);
     updateOverallSummary();
-    downloadAllBtn.hidden = successfulResults.length === 0;
+    downloadAllBtn.hidden = successfulResults.length < 2;
 
     runBtn.disabled = false;
     runBtn.textContent = "▶ 실행";

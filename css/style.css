@@ -442,6 +442,10 @@ body {
   background: #f3f7ff;
 }
 
+.download-btn[hidden] {
+  display: none;
+}
+
 .error-panel {
   background: var(--error-bg);
   border-color: var(--error-border);
