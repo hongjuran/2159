@@ -14,38 +14,38 @@
     <header class="app__header">
       <h1>마스킹 도구</h1>
 
+      <p class="app__notice">
+        🔒 모든 처리는 이 브라우저 안에서만 이루어지며, 파일 내용은 서버로 전송되지 않습니다.
+      </p>
+
       <div class="memo-boards">
         <div class="memo-board memo-board--purple">
-          <pre class="memo-board__content">[사용 방법]
+          <pre class="memo-board__content"><strong>[사용 방법]</strong>
 
 1. 파일을 첨부하세요.
    - PDF/이미지는 자동으로 검정색 마스킹 처리됩니다.
    - 엑셀/텍스트는 *(별표)와 검정색 마스킹 중 선택 가능합니다.
 
-(텍스트 파일만 해당)
+<span class="memo-board__dim">(텍스트 파일만 해당)</span>
 2. 인코딩 방법을 확인하세요.
 
-(텍스트/엑셀 파일 해당)
+<span class="memo-board__dim">(텍스트/엑셀 파일 해당)</span>
 3. 마스킹 방식을 선택하세요.
 
-(공통)
-4. [실행] 버튼을 눌러 마스킹 작업을 실행합니다.
-5. 반드시 [미리보기] 버튼을 눌러 결과물을 확인하세요.
-6. 결과물을 저장하세요.</pre>
+<span class="memo-board__dim">(공통)</span>
+4. <strong>[실행]</strong> 버튼을 눌러 마스킹 작업을 실행합니다.
+5. 반드시 미리보기 결과물을 확인하세요.
+6. [산출물 다운로드] 버튼을 눌러 파일을 저장하세요.</pre>
         </div>
 
         <div class="memo-board memo-board--blue">
-          <pre class="memo-board__content">[주의사항]
+          <pre class="memo-board__content"><strong>[주의사항]</strong>
 
 - 첨부한 파일은 보관되지 않습니다.
 - 결과물을 저장하기 전 반드시 미리보기로 마스킹 여부를 확인하세요.
 - PDF/이미지는 문자 인식(OCR)으로 마스킹이 필요한 위치를 찾아 검게 칠합니다. 인식 정확도는 이미지 해상도에 따라 달라질 수 있습니다.</pre>
         </div>
       </div>
-
-      <p class="app__notice">
-        🔒 모든 처리는 이 브라우저 안에서만 이루어지며, 파일 내용은 서버로 전송되지 않습니다.
-      </p>
     </header>
 
     <main class="app__main">
@@ -111,7 +111,12 @@
           </div>
         </div>
 
-        <button id="downloadBtn" class="download-btn">⬇ 마스킹된 파일 다운로드</button>
+        <button id="downloadBtn" class="download-btn">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4l1.7 2H19.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-10Z" />
+          </svg>
+          산출물 다운로드
+        </button>
       </section>
 
       <section id="errorPanel" class="panel error-panel" hidden>

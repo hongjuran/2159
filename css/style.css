@@ -106,10 +106,12 @@ body {
 
 .memo-board--purple {
   background: #efe6fb;
+  border: 2px dashed #c3aeea;
 }
 
 .memo-board--blue {
   background: #e2f3fb;
+  border: 2px dashed #9dcdea;
 }
 
 .memo-board__content {
@@ -121,6 +123,10 @@ body {
   color: var(--text);
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.memo-board__dim {
+  color: #999999;
 }
 
 .panel {
@@ -335,6 +341,10 @@ body {
 }
 
 .download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   margin-top: 18px;
   width: 100%;
   padding: 12px 16px;
