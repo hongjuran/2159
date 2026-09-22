@@ -77,15 +77,18 @@
     return { masked, count };
   }
 
-  // Finds every RRN match inside a run of text and returns character
-  // offsets, used both for plain-text replacement and for locating the
+  // Finds every RRN match inside a run of text and returns the character
+  // offsets of only the part that should be masked (the trailing 6
+  // digits, after the birth date + separator + gender digit that stay
+  // visible), used both for plain-text replacement and for locating the
   // matching region inside an OCR word / PDF text item for redaction.
   function findMatchRanges(text) {
     const matches = [];
     const re = new RegExp(RRN_REGEX.source, "g");
     let m = re.exec(text);
     while (m) {
-      matches.push({ start: m.index, end: m.index + m[0].length });
+      const maskStart = m.index + m[1].length + m[2].length + m[3].length;
+      matches.push({ start: maskStart, end: m.index + m[0].length });
       m = re.exec(text);
     }
     return matches;
@@ -115,8 +118,12 @@
   // `lines` is an array of { words: [{ text, bbox }] } grouped by row.
   // OCR (and PDFs with printed "721219 - 1328111" style spacing) often
   // splits a number across 2-3 tokens ("721219", "-", "1328111"), so
-  // this tries joining windows of 3, then 2, then falls back to single
-  // words, consuming whichever window matches first.
+  // this tries joining windows of 3, then 2, then 1 word. A match found
+  // in a window only boxes (and consumes) the specific word(s) whose
+  // character range actually overlaps the masked portion of the match —
+  // never the whole window — so an unrelated neighboring word (e.g. a
+  // name in the next table cell) never gets pulled into the redaction
+  // box just because it happened to sit in the same window as a number.
   function findRedactionBoxes(lines) {
     const boxes = [];
     lines.forEach((line) => {
@@ -128,18 +135,36 @@
           const idxs = Array.from({ length: windowSize }, (_, k) => i + k);
           if (idxs.some((idx) => consumed.has(idx))) continue;
 
-          if (windowSize === 1) {
-            const ranges = findMatchRanges(words[i].text);
-            if (ranges.length === 0) continue;
-            ranges.forEach((r) => {
-              boxes.push(interpolateBBox(words[i].bbox, words[i].text.length, r.start, r.end));
+          let offset = 0;
+          const wordOffsets = [];
+          idxs.forEach((idx, k) => {
+            if (k > 0) offset += 1; // the joining space
+            wordOffsets[idx] = offset;
+            offset += words[idx].text.length;
+          });
+          const joined = idxs.map((idx) => words[idx].text).join(" ");
+          const ranges = findMatchRanges(joined);
+          if (ranges.length === 0) continue;
+
+          ranges.forEach((r) => {
+            const wordBoxes = [];
+            const contributing = [];
+            idxs.forEach((idx) => {
+              const wStart = wordOffsets[idx];
+              const wEnd = wStart + words[idx].text.length;
+              const overlapStart = Math.max(wStart, r.start);
+              const overlapEnd = Math.min(wEnd, r.end);
+              if (overlapStart >= overlapEnd) return;
+              wordBoxes.push(
+                interpolateBBox(words[idx].bbox, words[idx].text.length, overlapStart - wStart, overlapEnd - wStart)
+              );
+              contributing.push(idx);
             });
-          } else {
-            const joined = idxs.map((idx) => words[idx].text).join(" ");
-            if (findMatchRanges(joined).length === 0) continue;
-            boxes.push(idxs.map((idx) => words[idx].bbox).reduce(unionBBox));
-          }
-          idxs.forEach((idx) => consumed.add(idx));
+            if (wordBoxes.length > 0) {
+              boxes.push(wordBoxes.reduce(unionBBox));
+              contributing.forEach((idx) => consumed.add(idx));
+            }
+          });
         }
       }
     });
