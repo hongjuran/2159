@@ -9,10 +9,12 @@
   const REDACTION_PADDING = 4;
 
   // Matches a Korean resident registration number: 6-digit birth date,
-  // optional separator, then a 7-digit block whose first digit is 1-8
-  // (gender/century code). Digit boundaries on both sides keep it from
-  // matching the middle of a longer number.
-  const RRN_REGEX = /(?<!\d)(\d{6})([-\s]?)([1-8])\d{6}(?!\d)/g;
+  // optional separator (a dash with up to a few spaces on either side —
+  // scanned/OCR'd forms often print "721219 - 1328111"), then a 7-digit
+  // block whose first digit is 1-8 (gender/century code). Digit
+  // boundaries on both sides keep it from matching the middle of a
+  // longer number.
+  const RRN_REGEX = /(?<!\d)(\d{6})([ \t]{0,3}-?[ \t]{0,3})([1-8])\d{6}(?!\d)/g;
 
   const dropZone = document.getElementById("dropZone");
   const fileInput = document.getElementById("fileInput");
@@ -110,32 +112,34 @@
   }
 
   // Shared matcher for both OCR word boxes and PDF text-layer boxes.
-  // `lines` is an array of { words: [{ text, bbox }] } grouped by row so
-  // that a number OCR/PDF split into two adjacent tokens can still be
-  // found by joining them with a space.
+  // `lines` is an array of { words: [{ text, bbox }] } grouped by row.
+  // OCR (and PDFs with printed "721219 - 1328111" style spacing) often
+  // splits a number across 2-3 tokens ("721219", "-", "1328111"), so
+  // this tries joining windows of 3, then 2, then falls back to single
+  // words, consuming whichever window matches first.
   function findRedactionBoxes(lines) {
     const boxes = [];
     lines.forEach((line) => {
       const words = (line.words || []).filter((w) => w.text && w.text.trim().length > 0);
       const consumed = new Set();
 
-      words.forEach((word, idx) => {
-        const ranges = findMatchRanges(word.text);
-        if (ranges.length > 0) {
-          ranges.forEach((r) => {
-            boxes.push(interpolateBBox(word.bbox, word.text.length, r.start, r.end));
-          });
-          consumed.add(idx);
-        }
-      });
+      for (let windowSize = 3; windowSize >= 1; windowSize -= 1) {
+        for (let i = 0; i <= words.length - windowSize; i += 1) {
+          const idxs = Array.from({ length: windowSize }, (_, k) => i + k);
+          if (idxs.some((idx) => consumed.has(idx))) continue;
 
-      for (let i = 0; i < words.length - 1; i += 1) {
-        if (consumed.has(i) || consumed.has(i + 1)) continue;
-        const joined = `${words[i].text} ${words[i + 1].text}`;
-        if (findMatchRanges(joined).length > 0) {
-          boxes.push(unionBBox(words[i].bbox, words[i + 1].bbox));
-          consumed.add(i);
-          consumed.add(i + 1);
+          if (windowSize === 1) {
+            const ranges = findMatchRanges(words[i].text);
+            if (ranges.length === 0) continue;
+            ranges.forEach((r) => {
+              boxes.push(interpolateBBox(words[i].bbox, words[i].text.length, r.start, r.end));
+            });
+          } else {
+            const joined = idxs.map((idx) => words[idx].text).join(" ");
+            if (findMatchRanges(joined).length === 0) continue;
+            boxes.push(idxs.map((idx) => words[idx].bbox).reduce(unionBBox));
+          }
+          idxs.forEach((idx) => consumed.add(idx));
         }
       }
     });
@@ -164,7 +168,7 @@
   function getOcrWorker() {
     if (!ocrWorkerPromise) {
       setProgress("OCR 엔진 로딩 중...");
-      ocrWorkerPromise = Tesseract.createWorker("eng", 1, {
+      ocrWorkerPromise = Tesseract.createWorker("kor+eng", 1, {
         workerPath: "js/tesseract/worker.min.js",
         corePath: "js/tesseract/core/tesseract-core-lstm.wasm.js",
         langPath: "js/tesseract/lang",
@@ -175,6 +179,14 @@
             setProgress(`${progressPrefix} ${m.status}`);
           }
         },
+      }).then(async (worker) => {
+        // Most scanned Korean forms mix table borders with Korean text;
+        // without an explicit page-segmentation mode, layout analysis on
+        // a kor+eng model can drop whole regions (e.g. a table's data
+        // rows) instead of reading them. PSM 3 (fully automatic) reliably
+        // keeps those regions.
+        await worker.setParameters({ tessedit_pageseg_mode: "3" });
+        return worker;
       });
     }
     return ocrWorkerPromise;
@@ -229,7 +241,7 @@
     const idx = originalName.lastIndexOf(".");
     const base = idx === -1 ? originalName : originalName.slice(0, idx);
     const ext = forcedExt || (idx === -1 ? "" : originalName.slice(idx + 1));
-    return `${base}_masked.${ext}`;
+    return `${base}_마스킹.${ext}`;
   }
 
   function readFileAsArrayBuffer(file) {

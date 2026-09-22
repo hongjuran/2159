@@ -69,6 +69,7 @@ Trust)를 설정해 로그인/허용 목록을 추가할 수 있습니다.
 - `js/pdf.min.js`, `js/pdf.worker.min.js` — PDF 렌더링/텍스트 추출을 위한 [pdf.js](https://mozilla.github.io/pdf.js/)
 - `js/pdf-lib.min.js` — 마스킹된 페이지로 새 PDF를 조립하기 위한 [pdf-lib](https://pdf-lib.js.org/)
 - `js/tesseract/` — 이미지·스캔 PDF의 문자 인식을 위한 [Tesseract.js](https://tesseract.projectnaptha.com/)
-  (`tesseract.min.js`, `worker.min.js`, `core/`의 WASM 엔진, `lang/eng.traineddata.gz` 영어+숫자 인식 데이터)
+  (`tesseract.min.js`, `worker.min.js`, `core/`의 WASM 엔진, `lang/`의 한국어+영어 인식 데이터). 한글이 섞인 스캔
+  문서에서 표/레이아웃 인식이 깨지는 것을 막기 위해 한국어 모델도 함께 사용합니다.
 
 모든 라이브러리는 완전한 오프라인 동작과 개인정보 보호를 위해 CDN 대신 저장소에 직접 포함했습니다.
