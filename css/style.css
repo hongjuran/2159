@@ -291,6 +291,11 @@ body {
   border-color: var(--success-border);
 }
 
+.results-section--danger {
+  background: var(--error-bg);
+  border-color: var(--error-border);
+}
+
 .results-header {
   display: flex;
   flex-wrap: wrap;
@@ -317,6 +322,11 @@ body {
   border-radius: 8px;
   background: #fff;
   padding: 0 16px;
+}
+
+.result-card--danger {
+  border-color: var(--error-border);
+  background: var(--error-bg);
 }
 
 .result-card[open] {

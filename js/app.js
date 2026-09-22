@@ -226,6 +226,7 @@
 
   function resetResults() {
     resultsSection.hidden = true;
+    resultsSection.classList.remove("results-section--danger");
     resultsList.innerHTML = "";
     downloadAllBtn.hidden = true;
     successfulResults = [];
@@ -333,6 +334,7 @@
 
     return {
       ok: true,
+      found: count > 0,
       summary:
         count > 0
           ? `총 ${count}건의 주민등록번호를 찾아 마스킹했습니다.`
@@ -390,6 +392,7 @@
 
     return {
       ok: true,
+      found: totalCount > 0,
       summary:
         totalCount > 0
           ? `총 ${totalCount}건의 주민등록번호를 찾아 마스킹했습니다.`
@@ -426,6 +429,7 @@
     const blob = await canvasToBlob(canvas, "image/png");
     return {
       ok: true,
+      found: boxes.length > 0,
       summary:
         boxes.length > 0
           ? `총 ${boxes.length}건의 주민등록번호로 추정되는 영역을 마스킹 했습니다.`
@@ -521,6 +525,7 @@
     const outBytes = await outPdf.save();
     return {
       ok: true,
+      found: totalCount > 0,
       summary:
         totalCount > 0
           ? `총 ${totalCount}건의 주민등록번호로 추정되는 영역을 마스킹 했습니다.`
@@ -600,9 +605,13 @@
     render();
   }
 
+  function isProblemResult(result) {
+    return !result.ok || result.found === false;
+  }
+
   function buildResultCard(file, result) {
     const details = document.createElement("details");
-    details.className = "result-card";
+    details.className = isProblemResult(result) ? "result-card result-card--danger" : "result-card";
     details.open = true;
 
     const summary = document.createElement("summary");
@@ -610,7 +619,9 @@
     nameSpan.className = "result-card__filename";
     nameSpan.textContent = file.name;
     const statusSpan = document.createElement("span");
-    statusSpan.className = result.ok ? "result-card__status" : "result-card__status result-card__status--error";
+    statusSpan.className = isProblemResult(result)
+      ? "result-card__status result-card__status--error"
+      : "result-card__status";
     statusSpan.textContent = result.ok ? result.summary : `오류: ${result.error}`;
     summary.appendChild(nameSpan);
     summary.appendChild(statusSpan);
@@ -819,6 +830,7 @@
     resultsSection.hidden = false;
     downloadAllBtn.hidden = true;
     successfulResults = [];
+    const runResults = [];
 
     const total = selectedFiles.length;
     for (let i = 0; i < total; i += 1) {
@@ -834,12 +846,17 @@
       }
 
       if (result.ok) successfulResults.push(result);
+      runResults.push(result);
       resultsList.appendChild(buildResultCard(file, result));
     }
 
     fileProgressLabel = "";
     setProgress(null);
     updateOverallSummary();
+    resultsSection.classList.toggle(
+      "results-section--danger",
+      total <= 1 && runResults.length === 1 && isProblemResult(runResults[0])
+    );
     downloadAllBtn.hidden = successfulResults.length < 2;
 
     runBtn.disabled = false;
