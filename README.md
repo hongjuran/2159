@@ -38,6 +38,28 @@ python3 -m http.server 8000
 # 브라우저에서 http://localhost:8000 접속
 ```
 
+## Cloudflare Pages 배포
+
+빌드 과정이 없는 순수 정적 사이트라 Cloudflare Pages에 그대로 올리면 됩니다.
+
+1. [Cloudflare 대시보드](https://dash.cloudflare.com/) → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+2. `hongjuran/2159` 저장소를 선택하고, 배포할 브랜치를 지정합니다 (지금은 `claude/resident-id-masking-web-evg5r6`, 나중에 `branch-me`/`main`에 머지되면 그 브랜치로 바꿔도 됩니다).
+3. 빌드 설정은 다음과 같이 지정합니다 (별도 빌드 과정이 없으므로):
+   - **Framework preset**: `None`
+   - **Build command**: 비워둠
+   - **Build output directory**: `/`
+4. **Save and Deploy**를 누르면 몇 분 안에 `<프로젝트명>.pages.dev` 주소로 배포됩니다.
+5. 커스텀 도메인을 쓰려면 Pages 프로젝트의 **Custom domains** 탭에서 도메인을 추가합니다. 도메인이 이미 Cloudflare에
+   있다면 DNS 레코드가 자동으로 붙고, 다른 곳에 있다면 안내되는 CNAME 레코드를 등록하면 됩니다.
+
+이후로는 이 브랜치에 push할 때마다 Cloudflare Pages가 자동으로 재배포합니다. 저장소가 퍼블릭이라 배포된 사이트도
+링크를 아는 누구나 접근할 수 있는 상태이며, 접근을 제한하고 싶다면 Pages 프로젝트에 **Cloudflare Access**(Zero
+Trust)를 설정해 로그인/허용 목록을 추가할 수 있습니다.
+
+저장소 루트의 `_headers` 파일이 Cloudflare Pages에 캐시 정책을 알려줍니다: 버전이 고정된 라이브러리
+(`js/xlsx.full.min.js`, `js/pdf*.js`, `js/tesseract/**`, `assets/**`)는 1년 캐시로, `index.html`/`js/app.js`/
+`css/style.css`처럼 자주 바뀌는 파일은 짧게 캐시해 배포 직후 변경 사항이 바로 반영되게 합니다.
+
 ## 구조
 
 - `index.html` — 페이지 마크업

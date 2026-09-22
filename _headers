@@ -1,0 +1,33 @@
+# Vendored, version-pinned libraries never change without a new commit
+# under a new filename check-in, so cache them aggressively at the edge
+# and in the browser.
+/js/xlsx.full.min.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/pdf.min.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/pdf.worker.min.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/pdf-lib.min.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/tesseract/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# App code and markup can change on any deploy, so keep these fresh.
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/js/app.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/css/style.css
+  Cache-Control: public, max-age=300, must-revalidate
