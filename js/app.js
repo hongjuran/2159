@@ -8,6 +8,12 @@
   const PDF_RENDER_SCALE = 2;
   const REDACTION_PADDING = 4;
 
+  const DOWNLOAD_ICON_SVG =
+    '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+    'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M3 7.5a1.5 1.5 0 0 1 1.5-1.5h4l1.7 2H19.5A1.5 1.5 0 0 1 21 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5v-10Z" />' +
+    "</svg>";
+
   // Matches a Korean resident registration number: 6-digit birth date,
   // optional separator (a dash with up to a few spaces on either side —
   // scanned/OCR'd forms often print "721219 - 1328111"), then a 7-digit
@@ -19,26 +25,16 @@
   const dropZone = document.getElementById("dropZone");
   const fileInput = document.getElementById("fileInput");
   const browseBtn = document.getElementById("browseBtn");
-  const fileNameEl = document.getElementById("fileName");
+  const fileNameList = document.getElementById("fileNameList");
   const encodingSelect = document.getElementById("encodingSelect");
   const maskStyleSelect = document.getElementById("maskStyleSelect");
   const runBtn = document.getElementById("runBtn");
   const progressText = document.getElementById("progressText");
 
-  const resultPanel = document.getElementById("resultPanel");
-  const resultSummary = document.getElementById("resultSummary");
-  const textResult = document.getElementById("textResult");
-  const maskedTextarea = document.getElementById("maskedTextarea");
-  const excelResult = document.getElementById("excelResult");
-  const excelPreview = document.getElementById("excelPreview");
-  const canvasResult = document.getElementById("canvasResult");
-  const canvasResultLabel = document.getElementById("canvasResultLabel");
-  const previewCanvas = document.getElementById("previewCanvas");
-  const pageNav = document.getElementById("pageNav");
-  const prevPageBtn = document.getElementById("prevPageBtn");
-  const nextPageBtn = document.getElementById("nextPageBtn");
-  const pageIndicator = document.getElementById("pageIndicator");
-  const downloadBtn = document.getElementById("downloadBtn");
+  const resultsSection = document.getElementById("resultsSection");
+  const resultSummaryAll = document.getElementById("resultSummaryAll");
+  const downloadAllBtn = document.getElementById("downloadAllBtn");
+  const resultsList = document.getElementById("resultsList");
 
   const errorPanel = document.getElementById("errorPanel");
   const errorText = document.getElementById("errorText");
@@ -47,12 +43,10 @@
     window.pdfjsLib.GlobalWorkerOptions.workerSrc = "js/pdf.worker.min.js";
   }
 
-  let selectedFile = null;
-  let pendingDownload = null; // { blob, filename }
-  let maskedPageCanvases = []; // canvases for image/PDF preview navigation
-  let currentPageIndex = 0;
+  let selectedFiles = [];
+  let successfulResults = []; // [{ blob, filename }] for files masked without error
   let ocrWorkerPromise = null;
-  let progressPrefix = "";
+  let fileProgressLabel = "";
 
   function getExtension(name) {
     const idx = name.lastIndexOf(".");
@@ -180,14 +174,14 @@
     ctx.fillRect(x, y, w, h);
   }
 
-  function setProgress(message) {
-    if (!message) {
+  function setProgress(stage) {
+    if (!stage) {
       progressText.hidden = true;
       progressText.textContent = "";
       return;
     }
     progressText.hidden = false;
-    progressText.textContent = message;
+    progressText.textContent = fileProgressLabel ? `${fileProgressLabel} — ${stage}` : stage;
   }
 
   function getOcrWorker() {
@@ -199,9 +193,9 @@
         langPath: "js/tesseract/lang",
         logger: (m) => {
           if (m.status === "recognizing text") {
-            setProgress(`${progressPrefix} 문자 인식 중... ${Math.round(m.progress * 100)}%`);
+            setProgress(`문자 인식 중... ${Math.round(m.progress * 100)}%`);
           } else if (m.status) {
-            setProgress(`${progressPrefix} ${m.status}`);
+            setProgress(m.status);
           }
         },
       }).then(async (worker) => {
@@ -220,7 +214,6 @@
   function showError(message) {
     errorPanel.hidden = false;
     errorText.textContent = message;
-    resultPanel.hidden = true;
   }
 
   function clearError() {
@@ -228,38 +221,48 @@
     errorText.textContent = "";
   }
 
-  function resetResult() {
-    resultPanel.hidden = true;
-    textResult.hidden = true;
-    excelResult.hidden = true;
-    canvasResult.hidden = true;
-    pageNav.hidden = true;
-    maskedTextarea.value = "";
-    excelPreview.innerHTML = "";
-    maskedPageCanvases = [];
-    currentPageIndex = 0;
-    pendingDownload = null;
+  function resetResults() {
+    resultsSection.hidden = true;
+    resultsList.innerHTML = "";
+    downloadAllBtn.hidden = true;
+    successfulResults = [];
     setProgress(null);
   }
 
-  function setSelectedFile(file) {
-    if (!file) return;
-    const ext = getExtension(file.name);
-    if (!ALL_EXTENSIONS.includes(ext)) {
-      showError(
-        `지원하지 않는 파일 형식입니다 (.${ext || "확장자 없음"}). ` +
-          `TXT, CSV, TSV, LOG, JSON, MD, XLSX, XLS, PDF, PNG, JPG, BMP, WEBP 파일만 지원합니다.`
-      );
-      selectedFile = null;
-      runBtn.disabled = true;
-      fileNameEl.textContent = "";
-      return;
-    }
+  function setSelectedFiles(fileList) {
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+
+    const valid = [];
+    const invalidNames = [];
+    files.forEach((file) => {
+      const ext = getExtension(file.name);
+      if (ALL_EXTENSIONS.includes(ext)) {
+        valid.push(file);
+      } else {
+        invalidNames.push(file.name);
+      }
+    });
+
     clearError();
-    resetResult();
-    selectedFile = file;
-    fileNameEl.textContent = `선택된 파일: ${file.name}`;
-    runBtn.disabled = false;
+    resetResults();
+
+    selectedFiles = valid;
+    fileNameList.innerHTML = "";
+    valid.forEach((file) => {
+      const li = document.createElement("li");
+      li.textContent = file.name;
+      fileNameList.appendChild(li);
+    });
+
+    if (invalidNames.length > 0) {
+      showError(
+        `지원하지 않는 형식이라 제외된 파일: ${invalidNames.join(", ")} ` +
+          `(TXT, CSV, TSV, LOG, JSON, MD, XLSX, XLS, PDF, PNG, JPG, BMP, WEBP만 지원합니다.)`
+      );
+    }
+
+    runBtn.disabled = valid.length === 0;
   }
 
   function downloadFilenameFor(originalName, forcedExt) {
@@ -305,26 +308,15 @@
     };
   }
 
-  function showCanvasResult(canvases, label) {
-    canvasResultLabel.textContent = label;
-    canvasResult.hidden = false;
-    textResult.hidden = true;
-    excelResult.hidden = true;
-    maskedPageCanvases = canvases;
-    currentPageIndex = 0;
-    renderCurrentPage();
-    pageNav.hidden = canvases.length <= 1;
-  }
-
-  function renderCurrentPage() {
-    const canvas = maskedPageCanvases[currentPageIndex];
-    if (!canvas) return;
-    previewCanvas.width = canvas.width;
-    previewCanvas.height = canvas.height;
-    previewCanvas.getContext("2d").drawImage(canvas, 0, 0);
-    pageIndicator.textContent = `${currentPageIndex + 1} / ${maskedPageCanvases.length} 페이지`;
-    prevPageBtn.disabled = currentPageIndex === 0;
-    nextPageBtn.disabled = currentPageIndex === maskedPageCanvases.length - 1;
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   // --- Text files ---
@@ -336,19 +328,16 @@
     const original = decoder.decode(buffer);
     const { masked, count } = maskText(original);
 
-    const blob = new Blob([masked], { type: "text/plain;charset=utf-8" });
-    pendingDownload = { blob, filename: downloadFilenameFor(file.name) };
-
-    resultSummary.textContent =
-      count > 0
-        ? `총 ${count}건의 주민등록번호를 찾아 마스킹했습니다.`
-        : "주민등록번호 패턴을 찾지 못했습니다. (파일에 변경 사항이 없습니다)";
-    textResult.hidden = false;
-    excelResult.hidden = true;
-    canvasResult.hidden = true;
-    pageNav.hidden = true;
-    maskedTextarea.value = masked;
-    resultPanel.hidden = false;
+    return {
+      ok: true,
+      summary:
+        count > 0
+          ? `총 ${count}건의 주민등록번호를 찾아 마스킹했습니다.`
+          : "주민등록번호 패턴을 찾지 못했습니다. (파일에 변경 사항이 없습니다)",
+      blob: new Blob([masked], { type: "text/plain;charset=utf-8" }),
+      filename: downloadFilenameFor(file.name),
+      preview: { type: "text", text: masked },
+    };
   }
 
   // --- Excel files ---
@@ -394,26 +383,23 @@
     });
 
     const outBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([outBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    pendingDownload = { blob, filename: downloadFilenameFor(file.name) };
-
-    resultSummary.textContent =
-      totalCount > 0
-        ? `총 ${totalCount}건의 주민등록번호를 찾아 마스킹했습니다.`
-        : "주민등록번호 패턴을 찾지 못했습니다. (파일에 변경 사항이 없습니다)";
-
     const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-    excelPreview.innerHTML = firstSheet
-      ? XLSX.utils.sheet_to_html(firstSheet, { editable: false })
-      : "<p>미리보기를 생성할 수 없습니다.</p>";
 
-    textResult.hidden = true;
-    excelResult.hidden = false;
-    canvasResult.hidden = true;
-    pageNav.hidden = true;
-    resultPanel.hidden = false;
+    return {
+      ok: true,
+      summary:
+        totalCount > 0
+          ? `총 ${totalCount}건의 주민등록번호를 찾아 마스킹했습니다.`
+          : "주민등록번호 패턴을 찾지 못했습니다. (파일에 변경 사항이 없습니다)",
+      blob: new Blob([outBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      filename: downloadFilenameFor(file.name),
+      preview: {
+        type: "excel",
+        html: firstSheet ? XLSX.utils.sheet_to_html(firstSheet, { editable: false }) : "<p>미리보기를 생성할 수 없습니다.</p>",
+      },
+    };
   }
 
   // --- Image files (OCR-based redaction) ---
@@ -427,23 +413,24 @@
     const ctx = canvas.getContext("2d");
     ctx.drawImage(drawable, 0, 0, width, height);
 
-    progressPrefix = "이미지";
     const worker = await getOcrWorker();
-    setProgress(`${progressPrefix} 문자 인식 중...`);
+    setProgress("문자 인식 중...");
     const { data } = await worker.recognize(canvas);
     const boxes = findRedactionBoxes(data.lines || []);
     boxes.forEach((b) => drawRedactionBox(ctx, b));
     setProgress(null);
 
     const blob = await canvasToBlob(canvas, "image/png");
-    pendingDownload = { blob, filename: downloadFilenameFor(file.name, "png") };
-
-    resultSummary.textContent =
-      boxes.length > 0
-        ? `총 ${boxes.length}건의 주민등록번호로 추정되는 영역을 찾아 검게 칠했습니다.`
-        : "주민등록번호로 추정되는 영역을 찾지 못했습니다. (원본과 동일할 수 있습니다)";
-    showCanvasResult([canvas], "마스킹 결과 미리보기");
-    resultPanel.hidden = false;
+    return {
+      ok: true,
+      summary:
+        boxes.length > 0
+          ? `총 ${boxes.length}건의 주민등록번호로 추정되는 영역을 마스킹 했습니다.`
+          : "주민등록번호로 추정되는 영역을 찾지 못했습니다. (원본과 동일할 수 있습니다)",
+      blob,
+      filename: downloadFilenameFor(file.name, "png"),
+      preview: { type: "canvas", canvases: [canvas], label: "마스킹 결과 미리보기" },
+    };
   }
 
   // --- PDF files ---
@@ -488,8 +475,8 @@
     let totalCount = 0;
 
     for (let pageNum = 1; pageNum <= numPages; pageNum += 1) {
-      progressPrefix = `${pageNum}/${numPages} 페이지`;
-      setProgress(`${progressPrefix} 렌더링 중...`);
+      const pagePrefix = numPages > 1 ? `${pageNum}/${numPages} 페이지 ` : "";
+      setProgress(`${pagePrefix}렌더링 중...`);
 
       const page = await pdfDoc.getPage(pageNum);
       const viewport = page.getViewport({ scale: PDF_RENDER_SCALE });
@@ -507,7 +494,7 @@
         const lines = buildLinesFromPdfTextContent(textContent, viewport);
         boxes = findRedactionBoxes(lines);
       } else {
-        setProgress(`${progressPrefix} OCR 처리 중... (스캔된 페이지로 추정)`);
+        setProgress(`${pagePrefix}OCR 처리 중... (스캔된 페이지로 추정)`);
         const worker = await getOcrWorker();
         const { data } = await worker.recognize(canvas);
         boxes = findRedactionBoxes(data.lines || []);
@@ -529,62 +516,337 @@
     setProgress(null);
 
     const outBytes = await outPdf.save();
-    const blob = new Blob([outBytes], { type: "application/pdf" });
-    pendingDownload = { blob, filename: downloadFilenameFor(file.name) };
-
-    resultSummary.textContent =
-      totalCount > 0
-        ? `총 ${totalCount}건의 주민등록번호로 추정되는 영역을 찾아 검게 칠했습니다. ` +
-          `(다운로드되는 PDF는 이미지로 재구성되어 가려진 글자가 남아있지 않습니다)`
-        : "주민등록번호로 추정되는 영역을 찾지 못했습니다.";
-    showCanvasResult(pageCanvases, "마스킹 결과 미리보기");
-    resultPanel.hidden = false;
+    return {
+      ok: true,
+      summary:
+        totalCount > 0
+          ? `총 ${totalCount}건의 주민등록번호로 추정되는 영역을 마스킹 했습니다.`
+          : "주민등록번호로 추정되는 영역을 찾지 못했습니다.",
+      note: "*다운로드 되는 PDF는 이미지로 재구성되어 가려진 글자가 남아 있지 않습니다.",
+      blob: new Blob([outBytes], { type: "application/pdf" }),
+      filename: downloadFilenameFor(file.name),
+      preview: { type: "canvas", canvases: pageCanvases, label: "마스킹 결과 미리보기" },
+    };
   }
 
+  async function processOneFile(file) {
+    const ext = getExtension(file.name);
+    const kind = fileKind(ext);
+    if (kind === "excel") return processExcelFile(file);
+    if (kind === "image") return processImageFile(file);
+    if (kind === "pdf") return processPdfFile(file);
+    return processTextFile(file);
+  }
+
+  // --- Result card rendering ---
+
+  function buildCanvasPreview(container, canvases) {
+    const wrap = document.createElement("div");
+    wrap.className = "canvas-preview";
+    const previewCanvas = document.createElement("canvas");
+    wrap.appendChild(previewCanvas);
+    container.appendChild(wrap);
+
+    let pageIndex = 0;
+    let prevBtn = null;
+    let nextBtn = null;
+    let indicator = null;
+
+    function render() {
+      const c = canvases[pageIndex];
+      previewCanvas.width = c.width;
+      previewCanvas.height = c.height;
+      previewCanvas.getContext("2d").drawImage(c, 0, 0);
+      if (indicator) {
+        indicator.textContent = `${pageIndex + 1} / ${canvases.length} 페이지`;
+        prevBtn.disabled = pageIndex === 0;
+        nextBtn.disabled = pageIndex === canvases.length - 1;
+      }
+    }
+
+    if (canvases.length > 1) {
+      const nav = document.createElement("div");
+      nav.className = "page-nav";
+      prevBtn = document.createElement("button");
+      prevBtn.type = "button";
+      prevBtn.className = "page-nav__btn";
+      prevBtn.textContent = "◀ 이전";
+      indicator = document.createElement("span");
+      nextBtn = document.createElement("button");
+      nextBtn.type = "button";
+      nextBtn.className = "page-nav__btn";
+      nextBtn.textContent = "다음 ▶";
+      prevBtn.addEventListener("click", () => {
+        if (pageIndex > 0) {
+          pageIndex -= 1;
+          render();
+        }
+      });
+      nextBtn.addEventListener("click", () => {
+        if (pageIndex < canvases.length - 1) {
+          pageIndex += 1;
+          render();
+        }
+      });
+      nav.appendChild(prevBtn);
+      nav.appendChild(indicator);
+      nav.appendChild(nextBtn);
+      container.appendChild(nav);
+    }
+
+    render();
+  }
+
+  function buildResultCard(file, result) {
+    const details = document.createElement("details");
+    details.className = "result-card";
+    details.open = true;
+
+    const summary = document.createElement("summary");
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "result-card__filename";
+    nameSpan.textContent = file.name;
+    const statusSpan = document.createElement("span");
+    statusSpan.className = result.ok ? "result-card__status" : "result-card__status result-card__status--error";
+    statusSpan.textContent = result.ok ? result.summary : `오류: ${result.error}`;
+    summary.appendChild(nameSpan);
+    summary.appendChild(statusSpan);
+    if (result.ok && result.note) {
+      const noteEl = document.createElement("span");
+      noteEl.className = "result-note";
+      noteEl.textContent = result.note;
+      summary.appendChild(noteEl);
+    }
+    details.appendChild(summary);
+
+    const body = document.createElement("div");
+    body.className = "result-card__body";
+
+    if (!result.ok) {
+      const p = document.createElement("p");
+      p.textContent = result.error;
+      body.appendChild(p);
+      details.appendChild(body);
+      return details;
+    }
+
+    if (result.preview.type === "text") {
+      const label = document.createElement("label");
+      label.className = "result-label";
+      label.textContent = "마스킹 결과 미리보기";
+      const textarea = document.createElement("textarea");
+      textarea.className = "masked-textarea";
+      textarea.readOnly = true;
+      textarea.value = result.preview.text;
+      body.appendChild(label);
+      body.appendChild(textarea);
+    } else if (result.preview.type === "excel") {
+      const label = document.createElement("label");
+      label.className = "result-label";
+      label.textContent = "마스킹 결과 미리보기 (첫 번째 시트)";
+      const wrap = document.createElement("div");
+      wrap.className = "excel-preview";
+      wrap.innerHTML = result.preview.html;
+      body.appendChild(label);
+      body.appendChild(wrap);
+    } else if (result.preview.type === "canvas") {
+      const label = document.createElement("label");
+      label.className = "result-label";
+      label.textContent = result.preview.label;
+      body.appendChild(label);
+      buildCanvasPreview(body, result.preview.canvases);
+    }
+
+    const downloadBtn = document.createElement("button");
+    downloadBtn.className = "download-btn";
+    downloadBtn.innerHTML = `${DOWNLOAD_ICON_SVG} 산출물 다운로드`;
+    downloadBtn.addEventListener("click", () => downloadBlob(result.blob, result.filename));
+    body.appendChild(downloadBtn);
+
+    details.appendChild(body);
+    return details;
+  }
+
+  function updateOverallSummary() {
+    const total = selectedFiles.length;
+    const okCount = successfulResults.length;
+    resultSummaryAll.innerHTML = "";
+
+    const mainLine = document.createElement("div");
+    mainLine.textContent =
+      total <= 1
+        ? okCount === 1
+          ? successfulResults[0].summary
+          : "이 파일을 처리하지 못했습니다."
+        : `총 ${total}개 파일 중 ${okCount}개 마스킹 완료했습니다.`;
+    resultSummaryAll.appendChild(mainLine);
+
+    if (total <= 1 && okCount === 1 && successfulResults[0].note) {
+      const noteLine = document.createElement("div");
+      noteLine.className = "result-note";
+      noteLine.textContent = successfulResults[0].note;
+      resultSummaryAll.appendChild(noteLine);
+    }
+  }
+
+  // --- ZIP writer (stored/uncompressed entries — no external dependency) ---
+
+  let crc32Table = null;
+  function crc32(bytes) {
+    if (!crc32Table) {
+      crc32Table = new Uint32Array(256);
+      for (let n = 0; n < 256; n += 1) {
+        let c = n;
+        for (let k = 0; k < 8; k += 1) {
+          c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        }
+        crc32Table[n] = c >>> 0;
+      }
+    }
+    let crc = 0xffffffff;
+    for (let i = 0; i < bytes.length; i += 1) {
+      crc = crc32Table[(crc ^ bytes[i]) & 0xff] ^ (crc >>> 8);
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+
+  function buildZip(entries) {
+    const encoder = new TextEncoder();
+    const localParts = [];
+    const centralParts = [];
+    let offset = 0;
+
+    entries.forEach((entry) => {
+      const nameBytes = encoder.encode(entry.name);
+      const data = entry.data;
+      const crc = crc32(data);
+      const size = data.length;
+
+      const localHeader = new DataView(new ArrayBuffer(30));
+      localHeader.setUint32(0, 0x04034b50, true);
+      localHeader.setUint16(4, 20, true);
+      localHeader.setUint16(6, 0x0800, true); // UTF-8 filename flag
+      localHeader.setUint16(8, 0, true);
+      localHeader.setUint16(10, 0, true);
+      localHeader.setUint16(12, 0x21, true);
+      localHeader.setUint32(14, crc, true);
+      localHeader.setUint32(18, size, true);
+      localHeader.setUint32(22, size, true);
+      localHeader.setUint16(26, nameBytes.length, true);
+      localHeader.setUint16(28, 0, true);
+      localParts.push(new Uint8Array(localHeader.buffer), nameBytes, data);
+
+      const centralHeader = new DataView(new ArrayBuffer(46));
+      centralHeader.setUint32(0, 0x02014b50, true);
+      centralHeader.setUint16(4, 20, true);
+      centralHeader.setUint16(6, 20, true);
+      centralHeader.setUint16(8, 0x0800, true); // UTF-8 filename flag
+      centralHeader.setUint16(10, 0, true);
+      centralHeader.setUint16(12, 0, true);
+      centralHeader.setUint16(14, 0x21, true);
+      centralHeader.setUint32(16, crc, true);
+      centralHeader.setUint32(20, size, true);
+      centralHeader.setUint32(24, size, true);
+      centralHeader.setUint16(28, nameBytes.length, true);
+      centralHeader.setUint16(30, 0, true);
+      centralHeader.setUint16(32, 0, true);
+      centralHeader.setUint16(34, 0, true);
+      centralHeader.setUint16(36, 0, true);
+      centralHeader.setUint32(38, 0, true);
+      centralHeader.setUint32(42, offset, true);
+      centralParts.push(new Uint8Array(centralHeader.buffer), nameBytes);
+
+      offset += 30 + nameBytes.length + size;
+    });
+
+    const centralOffset = offset;
+    const centralSize = centralParts.reduce((s, p) => s + p.length, 0);
+
+    const endRecord = new DataView(new ArrayBuffer(22));
+    endRecord.setUint32(0, 0x06054b50, true);
+    endRecord.setUint16(4, 0, true);
+    endRecord.setUint16(6, 0, true);
+    endRecord.setUint16(8, entries.length, true);
+    endRecord.setUint16(10, entries.length, true);
+    endRecord.setUint32(12, centralSize, true);
+    endRecord.setUint32(16, centralOffset, true);
+    endRecord.setUint16(20, 0, true);
+
+    return new Blob([...localParts, ...centralParts, new Uint8Array(endRecord.buffer)], { type: "application/zip" });
+  }
+
+  function uniqueZipName(name, used) {
+    if (!used.has(name)) {
+      used.add(name);
+      return name;
+    }
+    const idx = name.lastIndexOf(".");
+    const base = idx === -1 ? name : name.slice(0, idx);
+    const ext = idx === -1 ? "" : name.slice(idx);
+    let n = 2;
+    let candidate = `${base}(${n})${ext}`;
+    while (used.has(candidate)) {
+      n += 1;
+      candidate = `${base}(${n})${ext}`;
+    }
+    used.add(candidate);
+    return candidate;
+  }
+
+  async function downloadAllResults() {
+    if (successfulResults.length === 0) return;
+    const used = new Set();
+    const entries = [];
+    for (const r of successfulResults) {
+      const data = new Uint8Array(await r.blob.arrayBuffer());
+      entries.push({ name: uniqueZipName(r.filename, used), data });
+    }
+    downloadBlob(buildZip(entries), "마스킹_결과.zip");
+  }
+
+  // --- Main run loop ---
+
   async function runMasking() {
-    if (!selectedFile) return;
+    if (selectedFiles.length === 0) return;
     clearError();
     runBtn.disabled = true;
     runBtn.textContent = "처리 중...";
 
-    try {
-      const ext = getExtension(selectedFile.name);
-      const kind = fileKind(ext);
-      if (kind === "excel") {
-        await processExcelFile(selectedFile);
-      } else if (kind === "image") {
-        await processImageFile(selectedFile);
-      } else if (kind === "pdf") {
-        await processPdfFile(selectedFile);
-      } else {
-        await processTextFile(selectedFile);
-      }
-    } catch (err) {
-      console.error(err);
-      showError(`파일을 처리하는 중 오류가 발생했습니다: ${err.message || err}`);
-    } finally {
-      runBtn.disabled = false;
-      runBtn.textContent = "▶ 실행";
-      setProgress(null);
-    }
-  }
+    resultsList.innerHTML = "";
+    resultsSection.hidden = false;
+    downloadAllBtn.hidden = true;
+    successfulResults = [];
 
-  async function downloadResult() {
-    if (!pendingDownload) return;
-    const url = URL.createObjectURL(pendingDownload.blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = pendingDownload.filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const total = selectedFiles.length;
+    for (let i = 0; i < total; i += 1) {
+      const file = selectedFiles[i];
+      fileProgressLabel = total > 1 ? `파일 ${i + 1}/${total} (${file.name})` : file.name;
+
+      let result;
+      try {
+        result = await processOneFile(file);
+      } catch (err) {
+        console.error(err);
+        result = { ok: false, error: err.message || String(err) };
+      }
+
+      if (result.ok) successfulResults.push(result);
+      resultsList.appendChild(buildResultCard(file, result));
+    }
+
+    fileProgressLabel = "";
+    setProgress(null);
+    updateOverallSummary();
+    downloadAllBtn.hidden = successfulResults.length === 0;
+
+    runBtn.disabled = false;
+    runBtn.textContent = "▶ 실행";
   }
 
   // --- Event wiring ---
 
   browseBtn.addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", (e) => setSelectedFile(e.target.files[0]));
+  fileInput.addEventListener("change", (e) => setSelectedFiles(e.target.files));
 
   ["dragenter", "dragover"].forEach((evt) =>
     dropZone.addEventListener(evt, (e) => {
@@ -599,22 +861,9 @@
     })
   );
   dropZone.addEventListener("drop", (e) => {
-    const file = e.dataTransfer.files && e.dataTransfer.files[0];
-    setSelectedFile(file);
+    setSelectedFiles(e.dataTransfer.files);
   });
 
   runBtn.addEventListener("click", runMasking);
-  downloadBtn.addEventListener("click", downloadResult);
-  prevPageBtn.addEventListener("click", () => {
-    if (currentPageIndex > 0) {
-      currentPageIndex -= 1;
-      renderCurrentPage();
-    }
-  });
-  nextPageBtn.addEventListener("click", () => {
-    if (currentPageIndex < maskedPageCanvases.length - 1) {
-      currentPageIndex += 1;
-      renderCurrentPage();
-    }
-  });
+  downloadAllBtn.addEventListener("click", downloadAllResults);
 })();
