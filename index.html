@@ -13,9 +13,36 @@
   <div class="app">
     <header class="app__header">
       <h1>마스킹 도구</h1>
-      <p class="app__subtitle">
-        파일을 첨부하고 <strong>실행</strong> 버튼을 누르면 파일 안의 주민등록번호를 자동으로 찾아 마스킹합니다.
-      </p>
+
+      <div class="memo-boards">
+        <div class="memo-board memo-board--purple">
+          <pre class="memo-board__content">[사용 방법]
+
+1. 파일을 첨부하세요.
+   - PDF/이미지는 자동으로 검정색 마스킹 처리됩니다.
+   - 엑셀/텍스트는 *(별표)와 검정색 마스킹 중 선택 가능합니다.
+
+(텍스트 파일만 해당)
+2. 인코딩 방법을 확인하세요.
+
+(텍스트/엑셀 파일 해당)
+3. 마스킹 방식을 선택하세요.
+
+(공통)
+4. [실행] 버튼을 눌러 마스킹 작업을 실행합니다.
+5. 반드시 [미리보기] 버튼을 눌러 결과물을 확인하세요.
+6. 결과물을 저장하세요.</pre>
+        </div>
+
+        <div class="memo-board memo-board--blue">
+          <pre class="memo-board__content">[주의사항]
+
+- 첨부한 파일은 보관되지 않습니다.
+- 결과물을 저장하기 전 반드시 미리보기로 마스킹 여부를 확인하세요.
+- PDF/이미지는 문자 인식(OCR)으로 마스킹이 필요한 위치를 찾아 검게 칠합니다. 인식 정확도는 이미지 해상도에 따라 달라질 수 있습니다.</pre>
+        </div>
+      </div>
+
       <p class="app__notice">
         🔒 모든 처리는 이 브라우저 안에서만 이루어지며, 파일 내용은 서버로 전송되지 않습니다.
       </p>
@@ -25,35 +52,35 @@
       <section class="panel">
         <div id="dropZone" class="dropzone">
           <input type="file" id="fileInput" accept=".txt,.csv,.log,.json,.md,.tsv,.xlsx,.xls,.pdf,.png,.jpg,.jpeg,.bmp,.webp" hidden />
-          <div class="dropzone__icon">📎</div>
+          <div class="dropzone__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17.5 8.5 9.9 16.1a3 3 0 0 1-4.24-4.24l8.49-8.49a2 2 0 0 1 2.83 2.83l-8.49 8.49a1 1 0 0 1-1.41-1.41l7.07-7.07" />
+            </svg>
+          </div>
           <p class="dropzone__text">
-            여기로 파일을 끌어다 놓거나 <button type="button" id="browseBtn" class="link-btn">파일 선택</button>
+            여기로 파일 드래그 <span class="dropzone__or">OR</span> <button type="button" id="browseBtn" class="link-btn">파일 선택</button>
           </p>
           <p class="dropzone__hint">지원 형식: TXT, CSV, TSV, LOG, JSON, MD, XLSX, XLS, PDF, PNG, JPG, BMP, WEBP</p>
           <p id="fileName" class="dropzone__filename"></p>
         </div>
 
-        <div class="options">
-          <label for="encodingSelect">텍스트 파일 인코딩</label>
-          <select id="encodingSelect">
-            <option value="utf-8">UTF-8 (기본)</option>
-            <option value="euc-kr">EUC-KR / CP949</option>
-          </select>
-        </div>
+        <div class="options-row">
+          <div class="options">
+            <label for="encodingSelect">텍스트 인코딩</label>
+            <select id="encodingSelect">
+              <option value="utf-8">UTF-8 (기본)</option>
+              <option value="euc-kr">EUC-KR / CP949</option>
+            </select>
+          </div>
 
-        <div class="options">
-          <label for="maskStyleSelect">마스킹 방식 (텍스트·엑셀)</label>
-          <select id="maskStyleSelect">
-            <option value="asterisk">별표 (901231-1******)</option>
-            <option value="block">검정 블록 (901231-1██████)</option>
-          </select>
+          <div class="options">
+            <label for="maskStyleSelect">텍스트/엑셀 마스킹 방법</label>
+            <select id="maskStyleSelect">
+              <option value="asterisk">별표 (901231-1******)</option>
+              <option value="block">검정 블록 (901231-1██████)</option>
+            </select>
+          </div>
         </div>
-
-        <p class="options-note">
-          이미지·스캔 PDF는 문자 인식(OCR)으로 번호 위치를 찾아 검게 칠해 가립니다(항상 검정 마스킹). 인식 정확도는
-          이미지 화질에 따라 달라질 수 있으니, 다운로드 전 미리보기에서 마스킹이 제대로 됐는지 꼭 확인하세요. OCR
-          엔진은 최초 실행 시 한 번만 인터넷에서 내려받습니다(파일 내용 자체는 전송되지 않습니다).
-        </p>
 
         <button id="runBtn" class="run-btn" disabled>▶ 실행</button>
         <p id="progressText" class="progress-text" hidden></p>
@@ -93,11 +120,14 @@
     </main>
 
     <footer class="app__footer">
-      <p>
-        마스킹 규칙: <code>YYMMDD-N######</code> 형식의 13자리 주민등록번호에서 생년월일 6자리와 뒤 첫 번째 숫자(성별/세기 구분)만 남기고
-        나머지 6자리를 가립니다. 텍스트·엑셀은 별표(<code>*</code>) 또는 검정 블록(<code>█</code>) 중 선택할 수 있고,
-        이미지·PDF는 항상 검정 사각형으로 가려집니다. (예: 901231-1234567 → 901231-1****** 또는 901231-1██████)
-      </p>
+      <details class="rule-details">
+        <summary>마스킹 규칙</summary>
+        <p>
+          <code>YYMMDD-N######</code> 형식의 13자리 주민등록번호에서 생년월일 6자리와 뒤 첫 번째 숫자(성별/세기 구분)만 남기고
+          나머지 6자리를 가립니다. 텍스트·엑셀은 별표(<code>*</code>) 또는 검정 블록(<code>█</code>) 중 선택할 수 있고,
+          이미지·PDF는 항상 검정 사각형으로 가려집니다. (예: 901231-1234567 → 901231-1****** 또는 901231-1██████)
+        </p>
+      </details>
     </footer>
   </div>
 
