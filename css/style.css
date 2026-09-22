@@ -47,11 +47,41 @@ body {
   margin-bottom: 28px;
 }
 
+.memo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 4px 0 12px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.memo-toggle__arrow {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+  flex: 0 0 auto;
+}
+
+.memo-toggle[aria-expanded="true"] .memo-toggle__arrow {
+  transform: rotate(90deg);
+}
+
 .memo-boards {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   margin: 18px 0 30px;
+}
+
+.memo-boards--collapsed {
+  display: none;
 }
 
 .memo-board {

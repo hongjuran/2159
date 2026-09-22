@@ -39,6 +39,9 @@
   const errorPanel = document.getElementById("errorPanel");
   const errorText = document.getElementById("errorText");
 
+  const memoToggleBtn = document.getElementById("memoToggleBtn");
+  const memoBoards = document.getElementById("memoBoards");
+
   if (window.pdfjsLib) {
     window.pdfjsLib.GlobalWorkerOptions.workerSrc = "js/pdf.worker.min.js";
   }
@@ -866,4 +869,9 @@
 
   runBtn.addEventListener("click", runMasking);
   downloadAllBtn.addEventListener("click", downloadAllResults);
+
+  memoToggleBtn.addEventListener("click", () => {
+    const collapsed = memoBoards.classList.toggle("memo-boards--collapsed");
+    memoToggleBtn.setAttribute("aria-expanded", String(!collapsed));
+  });
 })();

@@ -76,7 +76,10 @@
     </main>
 
     <footer class="app__footer">
-      <div class="memo-boards">
+      <button type="button" id="memoToggleBtn" class="memo-toggle" aria-expanded="false" aria-controls="memoBoards">
+        <span class="memo-toggle__arrow" aria-hidden="true">▶</span> 사용 방법 · 주의사항
+      </button>
+      <div class="memo-boards memo-boards--collapsed" id="memoBoards">
         <div class="memo-board memo-board--purple">
           <pre class="memo-board__content"><strong>[사용 방법]</strong>
 
