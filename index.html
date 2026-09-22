@@ -105,7 +105,8 @@
 
 - 첨부한 파일은 보관되지 않습니다.
 - 결과물을 저장하기 전 반드시 미리보기로 마스킹 여부를 확인하세요.
-- PDF/이미지는 문자 인식(OCR)으로 마스킹이 필요한 위치를 찾아 검게 칠합니다. 인식 정확도는 이미지 해상도에 따라 달라질 수 있습니다.</pre>
+- PDF/이미지는 문자 인식(OCR)으로 마스킹이 필요한 위치를 찾아 검게 칠합니다. 인식 정확도는 이미지 해상도에 따라 달라질 수 있습니다.
+- 인쇄된 "주민등록번호" 옆에 손으로 쓴 숫자도 실험적으로 인식합니다. 정확도가 낮을 수 있으니 더욱 꼼꼼히 확인하세요.</pre>
         </div>
       </div>
 
@@ -124,6 +125,7 @@
   <script src="js/pdf.min.js"></script>
   <script src="js/pdf-lib.min.js"></script>
   <script src="js/tesseract/tesseract.min.js"></script>
+  <script src="js/digit-ocr/digit-ocr.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

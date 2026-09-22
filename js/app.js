@@ -178,6 +178,110 @@
     ctx.fillRect(x, y, w, h);
   }
 
+  // --- Handwritten-digit fallback ---
+  //
+  // Tesseract is a printed-text engine; it finds nothing where an RRN was
+  // handwritten. This looks for a printed "주민등록번호"-ish label that
+  // Tesseract DID read but with no matching digit sequence next to it
+  // (a strong signal the value itself is handwritten), then hands the
+  // region to the right of that label to js/digit-ocr's isolated-digit
+  // classifier. Confidence is inherently lower than printed-text
+  // detection, so results are tagged `handwritten: true` for the UI to
+  // flag as needing manual verification.
+  const LABEL_BIGRAMS = ["주민", "민등", "등록", "록번", "번호"];
+  const HANDWRITING_MIN_CONFIDENCE = 0.75;
+
+  function looksLikeRrnLabel(text) {
+    const compact = text.replace(/\s+/g, "");
+    let hits = 0;
+    LABEL_BIGRAMS.forEach((bg) => {
+      if (compact.includes(bg)) hits += 1;
+    });
+    return hits >= 2;
+  }
+
+  async function scanLinesForHandwriting(canvas, lines) {
+    const results = [];
+
+    for (const line of lines) {
+      const words = (line.words || []).filter((w) => w.text && w.text.trim().length > 0);
+      if (words.length === 0) continue;
+
+      const lineText = words.map((w) => w.text).join("");
+      if (!looksLikeRrnLabel(lineText)) continue;
+
+      const joined = words.map((w) => w.text).join(" ");
+      if (findMatchRanges(joined).length > 0) continue; // already handled as printed text
+
+      // A handwritten value sitting right after the label often gets
+      // dragged into the same OCR "line" as garbled pseudo-words (OCR's
+      // best/failed guess at the handwriting). Anchor on the last word
+      // that's actually part of the printed label (Hangul, or label
+      // punctuation like ":") rather than the line's last word, so that
+      // garbage doesn't get mistaken for the label's own end and shrink
+      // the search region down to almost nothing.
+      const labelWords = [];
+      for (const w of words) {
+        if (/[가-힣:：]/.test(w.text)) {
+          labelWords.push(w);
+        } else {
+          break;
+        }
+      }
+      if (labelWords.length === 0) continue;
+      const lastWord = labelWords[labelWords.length - 1];
+
+      const lineHeight = Math.max(...words.map((w) => w.bbox.y1 - w.bbox.y0));
+      const region = {
+        x0: lastWord.bbox.x1 + 4,
+        y0: Math.min(...words.map((w) => w.bbox.y0)) - lineHeight * 0.3,
+        x1: Math.min(canvas.width, lastWord.bbox.x1 + lineHeight * 16),
+        y1: Math.max(...words.map((w) => w.bbox.y1)) + lineHeight * 0.3,
+      };
+      if (region.x1 <= region.x0) continue;
+
+      // eslint-disable-next-line no-await-in-loop
+      const detected = await window.DigitOCR.recognizeDigitsInRegion(canvas, region);
+      if (!detected || detected.avgConfidence < HANDWRITING_MIN_CONFIDENCE) continue;
+
+      const ranges = findMatchRanges(detected.text);
+      ranges.forEach((r) => {
+        const maskBoxes = detected.boxes.slice(r.start, r.end);
+        if (maskBoxes.length === 0) return;
+        results.push({
+          box: maskBoxes.reduce(unionBBox),
+          confidence: detected.avgConfidence,
+        });
+      });
+    }
+
+    return results;
+  }
+
+  // The main OCR pass uses PSM 3 (AUTO), which is what reliably reads
+  // dense real-world forms full of printed tables (verified against
+  // actual scanned documents). But a page that's almost entirely blank
+  // apart from a label and a handwritten value trips up PSM 3's layout
+  // analysis — PSM 6 (SINGLE_BLOCK) reads that sparse case correctly
+  // instead. Rather than picking one PSM and accepting the other's
+  // failure mode, only pay for a second OCR pass when the first one
+  // found nothing to work with.
+  async function findHandwrittenBoxes(canvas, primaryLines) {
+    if (!window.DigitOCR) return [];
+
+    const primaryResults = await scanLinesForHandwriting(canvas, primaryLines);
+    if (primaryResults.length > 0) return primaryResults;
+
+    const totalChars = primaryLines.reduce((sum, l) => sum + (l.text || "").length, 0);
+    if (totalChars > 40) return primaryResults; // page already has plenty of recognized text
+
+    const worker = await getOcrWorker();
+    await worker.setParameters({ tessedit_pageseg_mode: "6" });
+    const { data } = await worker.recognize(canvas);
+    await worker.setParameters({ tessedit_pageseg_mode: "3" });
+    return scanLinesForHandwriting(canvas, data.lines || []);
+  }
+
   function setProgress(stage) {
     if (!stage) {
       progressText.hidden = true;
@@ -424,6 +528,11 @@
     setProgress("문자 인식 중...");
     const { data } = await worker.recognize(canvas);
     const boxes = findRedactionBoxes(data.lines || []);
+
+    setProgress("손글씨 숫자 확인 중...");
+    const handwrittenBoxes = await findHandwrittenBoxes(canvas, data.lines || []);
+    handwrittenBoxes.forEach((h) => boxes.push(h.box));
+
     boxes.forEach((b) => drawRedactionBox(ctx, b));
     setProgress(null);
 
@@ -435,6 +544,10 @@
         boxes.length > 0
           ? `총 ${boxes.length}건의 주민등록번호로 추정되는 영역을 마스킹 했습니다.`
           : "주민등록번호로 추정되는 영역을 찾지 못했습니다. (원본과 동일할 수 있습니다)",
+      note:
+        handwrittenBoxes.length > 0
+          ? `*이 중 ${handwrittenBoxes.length}건은 손글씨로 추정되어 자동 인식되었습니다. 인식 정확도가 낮을 수 있으니 미리보기로 꼭 확인하세요.`
+          : undefined,
       blob,
       filename: downloadFilenameFor(file.name, "png"),
       preview: { type: "canvas", canvases: [canvas], label: "마스킹 결과 미리보기" },
@@ -481,6 +594,7 @@
     const outPdf = await PDFLib.PDFDocument.create();
     const pageCanvases = [];
     let totalCount = 0;
+    let handwrittenCount = 0;
 
     for (let pageNum = 1; pageNum <= numPages; pageNum += 1) {
       const pagePrefix = numPages > 1 ? `${pageNum}/${numPages} 페이지 ` : "";
@@ -506,6 +620,11 @@
         const worker = await getOcrWorker();
         const { data } = await worker.recognize(canvas);
         boxes = findRedactionBoxes(data.lines || []);
+
+        setProgress(`${pagePrefix}손글씨 숫자 확인 중...`);
+        const handwrittenBoxes = await findHandwrittenBoxes(canvas, data.lines || []);
+        handwrittenCount += handwrittenBoxes.length;
+        handwrittenBoxes.forEach((h) => boxes.push(h.box));
       }
 
       totalCount += boxes.length;
@@ -524,6 +643,12 @@
     setProgress(null);
 
     const outBytes = await outPdf.save();
+    const notes = ["*다운로드 되는 PDF는 이미지로 재구성되어 가려진 글자가 남아 있지 않습니다."];
+    if (handwrittenCount > 0) {
+      notes.push(
+        `*이 중 ${handwrittenCount}건은 손글씨로 추정되어 자동 인식되었습니다. 인식 정확도가 낮을 수 있으니 미리보기로 꼭 확인하세요.`
+      );
+    }
     return {
       ok: true,
       found: totalCount > 0,
@@ -531,7 +656,7 @@
         totalCount > 0
           ? `총 ${totalCount}건의 주민등록번호로 추정되는 영역을 마스킹 했습니다.`
           : "주민등록번호로 추정되는 영역을 찾지 못했습니다.",
-      note: "*다운로드 되는 PDF는 이미지로 재구성되어 가려진 글자가 남아 있지 않습니다.",
+      note: notes.join(" "),
       blob: new Blob([outBytes], { type: "application/pdf" }),
       filename: downloadFilenameFor(file.name),
       preview: { type: "canvas", canvases: pageCanvases, label: "마스킹 결과 미리보기" },
