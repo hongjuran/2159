@@ -50,28 +50,70 @@ body {
 .memo-boards {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin: 4px 0 20px;
+  gap: 36px;
+  margin: 18px 0 30px;
+  padding: 6px;
 }
 
 .memo-board {
+  position: relative;
   flex: 1 1 260px;
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  box-shadow: 0 1px 2px rgba(31, 36, 48, 0.06);
+  padding: 26px 22px 24px;
+  border-radius: 3px;
+  box-shadow: 3px 6px 0 rgba(31, 36, 48, 0.05), 4px 10px 16px rgba(31, 36, 48, 0.16);
+  transform: rotate(-2.2deg);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.memo-board--purple {
-  background: #efe9fb;
-  border: 1px solid #d9cdf2;
+.memo-board:hover {
+  transform: rotate(0deg) translateY(-2px);
+  box-shadow: 3px 8px 0 rgba(31, 36, 48, 0.05), 6px 14px 20px rgba(31, 36, 48, 0.2);
 }
 
 .memo-board--blue {
-  background: #e5f4fb;
-  border: 1px solid #c7e6f5;
+  transform: rotate(1.8deg);
+}
+
+/* Folded corner, like a peeled sticky-note edge. */
+.memo-board::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 0 0 3px 0;
+  background: linear-gradient(135deg, transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+}
+
+/* Washi-tape strip holding the note in place. */
+.memo-board::before {
+  content: "";
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 76px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 1px 3px rgba(31, 36, 48, 0.15);
+  transform: translateX(-50%) rotate(-3deg);
+}
+
+.memo-board--blue::before {
+  transform: translateX(-50%) rotate(2.5deg);
+}
+
+.memo-board--purple {
+  background: #efe6fb;
+}
+
+.memo-board--blue {
+  background: #e2f3fb;
 }
 
 .memo-board__content {
+  position: relative;
   margin: 0;
   font-family: "SFMono-Regular", Consolas, Menlo, monospace;
   font-size: 12.5px;
@@ -145,21 +187,24 @@ body {
 }
 
 .options-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
   margin: 18px 0 20px;
 }
 
 .options {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
   font-size: 14px;
   color: var(--text-muted);
+  min-width: 0;
 }
 
 .options select {
+  width: 100%;
   font: inherit;
   padding: 6px 10px;
   border-radius: 6px;
