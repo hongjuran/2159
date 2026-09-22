@@ -686,9 +686,13 @@
   // exact summary/note, so the overview header would just repeat it —
   // skip it entirely and only show the header (aggregate count +
   // "전체 산출물 다운로드") once there's more than one file.
-  function updateOverallSummary() {
+  //
+  // "완료" only ever means a file was actually masked (found !== false);
+  // a file that processed without error but matched nothing is its own
+  // "찾지 못함" bucket, kept separate from real processing failures, so
+  // e.g. "2개 파일 모두 실패" never gets reported as "2개 마스킹 완료".
+  function updateOverallSummary(runResults) {
     const total = selectedFiles.length;
-    const okCount = successfulResults.length;
 
     if (total <= 1) {
       resultsHeader.hidden = true;
@@ -697,9 +701,19 @@
     }
 
     resultsHeader.hidden = false;
+
+    const maskedCount = runResults.filter((r) => r.ok && r.found !== false).length;
+    const notFoundCount = runResults.filter((r) => r.ok && r.found === false).length;
+    const errorCount = runResults.filter((r) => !r.ok).length;
+
+    const parts = [];
+    if (maskedCount > 0) parts.push(`${maskedCount}개 마스킹 완료`);
+    if (notFoundCount > 0) parts.push(`${notFoundCount}개 주민등록번호를 찾지 못함`);
+    if (errorCount > 0) parts.push(`${errorCount}개 처리 실패`);
+
     resultSummaryAll.innerHTML = "";
     const mainLine = document.createElement("div");
-    mainLine.textContent = `총 ${total}개 파일 중 ${okCount}개 마스킹 완료했습니다.`;
+    mainLine.textContent = `총 ${total}개 파일 중 ${parts.join(", ")}`;
     resultSummaryAll.appendChild(mainLine);
   }
 
@@ -852,10 +866,10 @@
 
     fileProgressLabel = "";
     setProgress(null);
-    updateOverallSummary();
+    updateOverallSummary(runResults);
     resultsSection.classList.toggle(
       "results-section--danger",
-      total <= 1 && runResults.length === 1 && isProblemResult(runResults[0])
+      runResults.length > 0 && runResults.every(isProblemResult)
     );
     downloadAllBtn.hidden = successfulResults.length < 2;
 
