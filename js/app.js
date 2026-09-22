@@ -32,6 +32,7 @@
   const progressText = document.getElementById("progressText");
 
   const resultsSection = document.getElementById("resultsSection");
+  const resultsHeader = document.getElementById("resultsHeader");
   const resultSummaryAll = document.getElementById("resultSummaryAll");
   const downloadAllBtn = document.getElementById("downloadAllBtn");
   const resultsList = document.getElementById("resultsList");
@@ -681,26 +682,25 @@
     return details;
   }
 
+  // With a single file, the one result card below already shows this
+  // exact summary/note, so the overview header would just repeat it —
+  // skip it entirely and only show the header (aggregate count +
+  // "전체 산출물 다운로드") once there's more than one file.
   function updateOverallSummary() {
     const total = selectedFiles.length;
     const okCount = successfulResults.length;
-    resultSummaryAll.innerHTML = "";
 
-    const mainLine = document.createElement("div");
-    mainLine.textContent =
-      total <= 1
-        ? okCount === 1
-          ? successfulResults[0].summary
-          : "이 파일을 처리하지 못했습니다."
-        : `총 ${total}개 파일 중 ${okCount}개 마스킹 완료했습니다.`;
-    resultSummaryAll.appendChild(mainLine);
-
-    if (total <= 1 && okCount === 1 && successfulResults[0].note) {
-      const noteLine = document.createElement("div");
-      noteLine.className = "result-note";
-      noteLine.textContent = successfulResults[0].note;
-      resultSummaryAll.appendChild(noteLine);
+    if (total <= 1) {
+      resultsHeader.hidden = true;
+      resultSummaryAll.innerHTML = "";
+      return;
     }
+
+    resultsHeader.hidden = false;
+    resultSummaryAll.innerHTML = "";
+    const mainLine = document.createElement("div");
+    mainLine.textContent = `총 ${total}개 파일 중 ${okCount}개 마스킹 완료했습니다.`;
+    resultSummaryAll.appendChild(mainLine);
   }
 
   // --- ZIP writer (stored/uncompressed entries — no external dependency) ---

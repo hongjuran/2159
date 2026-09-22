@@ -305,6 +305,10 @@ body {
   margin-bottom: 16px;
 }
 
+.results-header[hidden] {
+  display: none;
+}
+
 .results-header .download-btn {
   margin-top: 0;
   width: auto;
