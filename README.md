@@ -75,5 +75,8 @@ Trust)를 설정해 로그인/허용 목록을 추가할 수 있습니다.
 - `js/tesseract/` — 이미지·스캔 PDF의 문자 인식을 위한 [Tesseract.js](https://tesseract.projectnaptha.com/)
   (`tesseract.min.js`, `worker.min.js`, `core/`의 WASM 엔진, `lang/`의 한국어+영어 인식 데이터). 한글이 섞인 스캔
   문서에서 표/레이아웃 인식이 깨지는 것을 막기 위해 한국어 모델도 함께 사용합니다.
+- `assets/fonts/` — [Pretendard](https://cactus.tistory.com/306) 웹폰트(Light/Medium/SemiBold/Bold 4종, woff2).
+  Regular(400) 굵기는 포함하지 않아, 굵기를 지정하지 않은 텍스트는 브라우저의 폰트 매칭 규칙에 따라 자동으로
+  Medium(500)으로 대체됩니다.
 
-모든 라이브러리는 완전한 오프라인 동작과 개인정보 보호를 위해 CDN 대신 저장소에 직접 포함했습니다.
+모든 라이브러리·폰트는 완전한 오프라인 동작과 개인정보 보호를 위해 CDN 대신 저장소에 직접 포함했습니다.
